@@ -7,12 +7,23 @@ use App\Mail\ReminderMail;
 use App\Models\Fast;
 use App\Models\Reminder;
 use App\Models\User;
+use Illuminate\Mail\Mailable;
 
 /*
 | CLAUDE.md: every email includes a working unsubscribe link and a link to
 | the preference center. Each kind of email Beach Ready sends is listed
 | here, so a new one can't skip the footer or the headers.
 */
+
+it('is the base of every email the app can send', function () {
+    $mailables = collect(glob(app_path('Mail/*.php')))
+        ->map(fn (string $path) => 'App\\Mail\\'.basename($path, '.php'))
+        ->filter(fn (string $class) => is_subclass_of($class, Mailable::class) && ! (new ReflectionClass($class))->isAbstract());
+
+    expect($mailables)->not->toBeEmpty();
+    $mailables->each(fn (string $class) => expect(is_subclass_of($class, BeachReadyMail::class))
+        ->toBeTrue("{$class} must extend BeachReadyMail to get the footer and unsubscribe headers."));
+});
 
 dataset('every email', [
     'confirmation' => [fn () => new ConfirmEmailMail(User::factory()->create())],
