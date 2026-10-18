@@ -66,7 +66,7 @@ I'm building Beach Ready with [Claude Code](https://docs.claude.com/en/docs/clau
 ## Author
 
 **Muthoni Nguthi**, engineer and technical lead, Nairobi.
-[Portfolio](https://muthoni-nguthi.subscribepage.io) · [LinkedIn]([https://www.linkedin.com/in/mnguthi/])
+[Portfolio](https://muthoni-nguthi.subscribepage.io) · [LinkedIn](https://www.linkedin.com/in/mnguthi/)
 
 ## Copyright
 
