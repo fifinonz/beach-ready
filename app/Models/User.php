@@ -22,6 +22,19 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * The same defaults as the columns, so a user who was just created has
+     * them before being read back from the database.
+     */
+    protected $attributes = [
+        'remind_before_goal' => true,
+        'remind_goal_reached' => true,
+        'remind_eating_window_closing' => false,
+        'email_fasting_reminders' => false,
+        'email_weekly_summary' => false,
+        'email_product_news' => false,
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
