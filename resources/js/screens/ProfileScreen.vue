@@ -31,12 +31,14 @@ onMounted(async () => {
 });
 
 const protocol = computed(() => {
-    const hours = user.value.fasting_hours ?? 16;
+    const hours = user.value?.fasting_hours ?? 16;
     return `${hours}:${24 - hours}`;
 });
 
 // "Oct", or "Oct 2025" from another year.
 const memberSince = computed(() => {
+    if (!user.value) return null;
+
     const since = new Date(user.value.member_since);
     const sameYear = since.getFullYear() === new Date().getFullYear();
 
@@ -46,7 +48,7 @@ const memberSince = computed(() => {
 
 /* My why: saved when the field loses focus. */
 
-const why = ref(user.value.why ?? '');
+const why = ref(user.value?.why ?? '');
 const whyStatus = ref(null);
 
 async function saveWhy() {
@@ -95,7 +97,8 @@ async function signOut() {
     <AppLayout>
         <PageHeader title="Profile" />
 
-        <div class="profile">
+        <!-- Nothing to show in the moment between logging out and leaving. -->
+        <div v-if="user" class="profile">
             <section class="identity">
                 <span class="avatar" aria-hidden="true">{{ user.first_name[0] }}</span>
                 <div>
