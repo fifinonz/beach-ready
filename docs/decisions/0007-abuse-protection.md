@@ -15,6 +15,8 @@ Named rate limiters in `AppServiceProvider`, applied with Laravel's `throttle` m
 | | 20 a minute | IP address | Trying many accounts from one place |
 | `POST /api/settings/email/confirmation` | 5 an hour | account | Flooding an inbox. The one-per-60-seconds rule (decision 0006) still applies underneath. |
 | `/email/preferences/*` | 30 a minute | IP address | Hammering the public pages, including with made-up signatures |
+| Every signed-in `/api/*` request | 120 a minute | account | A script hammering the API with a stolen or scripted session. The app makes a few requests per screen. |
+| `DELETE /api/account` | 5 a minute | account | Guessing the password from an open session, since deleting checks it |
 
 - **The numbers are generous for people.** Ten sign-ups an hour covers an office or a household sharing one IP address. Five log-in attempts a minute is more than anyone needs to remember a password. The owner of an account under attack can still log in from their own IP address.
 - **Unsubscribe isn't rate limited.** Mail providers send one-click unsubscribes for many people from the same servers, so a per-IP limit could block real unsubscribes, and an unsubscribe that doesn't work breaks the rule that every email has a working one. It's signed, so it can't be pointed at other people, and doing it twice changes nothing.

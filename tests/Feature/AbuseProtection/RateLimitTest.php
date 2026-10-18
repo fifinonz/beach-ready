@@ -191,3 +191,65 @@ describe('the public preference center', function () {
         }
     });
 });
+
+describe('signed-in API requests', function () {
+    beforeEach(function () {
+        $this->user = User::factory()->create(['password' => 'a-long-password']);
+        $this->actingAs($this->user);
+    });
+
+    it('allows 120 a minute for one account', function () {
+        foreach (range(1, 120) as $n) {
+            $this->getJson('/api/user')->assertOk();
+        }
+
+        $this->getJson('/api/fasts/active')
+            ->assertTooManyRequests()
+            ->assertHeader('Retry-After');
+    });
+
+    it('counts each account separately', function () {
+        foreach (range(1, 120) as $n) {
+            $this->getJson('/api/user');
+        }
+
+        // A fresh session, as another person's browser would have.
+        $this->flushSession();
+        $this->actingAs(User::factory()->create())->getJson('/api/user')->assertOk();
+    });
+
+    it('allows requests again after a minute', function () {
+        foreach (range(1, 120) as $n) {
+            $this->getJson('/api/user');
+        }
+        $this->travel(61)->seconds();
+
+        $this->getJson('/api/user')->assertOk();
+    });
+});
+
+describe('deleting an account', function () {
+    beforeEach(function () {
+        $this->user = User::factory()->create(['password' => 'a-long-password']);
+        $this->actingAs($this->user);
+    });
+
+    it('allows 5 password attempts a minute for one account', function () {
+        foreach (range(1, 5) as $attempt) {
+            $this->deleteJson('/api/account', ['password' => 'wrong-password'])->assertUnprocessable();
+        }
+
+        // Even the right password is refused until the minute is up.
+        $this->deleteJson('/api/account', ['password' => 'a-long-password'])->assertTooManyRequests();
+        expect($this->user->fresh())->not->toBeNull();
+    });
+
+    it('allows another attempt after a minute', function () {
+        foreach (range(1, 5) as $attempt) {
+            $this->deleteJson('/api/account', ['password' => 'wrong-password']);
+        }
+        $this->travel(61)->seconds();
+
+        $this->deleteJson('/api/account', ['password' => 'a-long-password'])->assertNoContent();
+    });
+});

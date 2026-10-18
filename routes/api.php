@@ -17,7 +17,7 @@ Route::post('/register', [RegisteredUserController::class, 'store'])
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('throttle:login');
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
     Route::get('/user', fn (Request $request) => UserResource::make($request->user()));
 
@@ -37,5 +37,6 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware('throttle:confirmation-resend');
 
     Route::get('/account/export', [AccountController::class, 'export']);
-    Route::delete('/account', [AccountController::class, 'destroy']);
+    Route::delete('/account', [AccountController::class, 'destroy'])
+        ->middleware('throttle:account-delete');
 });

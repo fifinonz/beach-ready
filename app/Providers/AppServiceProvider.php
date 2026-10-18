@@ -51,5 +51,13 @@ class AppServiceProvider extends ServiceProvider
 
         // The public preference center, reached from links in emails.
         RateLimiter::for('preference-center', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
+
+        // Every signed-in API request: 120 a minute for one account. The app
+        // makes a few requests per screen, so only a script gets near it.
+        RateLimiter::for('api', fn (Request $request) => Limit::perMinute(120)->by((string) $request->user()?->id));
+
+        // Deleting an account checks the password, so it's limited like
+        // log-in attempts: five a minute for one account.
+        RateLimiter::for('account-delete', fn (Request $request) => Limit::perMinute(5)->by((string) $request->user()?->id));
     }
 }
