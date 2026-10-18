@@ -54,8 +54,8 @@ const restText = (row) => (row.days > 1 ? 'Rest days' : row.streakKept ? 'Rest d
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    min-height: 56px;
-    padding: 12px 0;
+    min-height: 48px;
+    padding: 10px 0;
     font-size: 1.0625rem;
 }
 
