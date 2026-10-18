@@ -16,7 +16,7 @@ CLAUDE.md sets the rules: no email until the address is confirmed through a sign
 - **Unsubscribe asks first; a POST does it.** Mail scanners open links on their own, so opening the link only shows a button. The POST does it, and it's also the one-click endpoint mail clients call from the `List-Unsubscribe-Post` header (RFC 8058). That POST is exempt from CSRF, because mail clients can't send a token; the signature is the proof.
 - **Unsubscribing turns every topic off but keeps the address confirmed.** Opting back in later doesn't need a new confirmation email, since the address hasn't changed.
 - **Every email extends `BeachReadyMail`.** That base class adds the `List-Unsubscribe` headers and the footer: why you're getting the email, the preference center and unsubscribe links, and the postal address. A test lists every email class, so a new one can't skip the footer.
-- **Deleting an account needs the current password.** It can't be undone, and a session left open on a shared device shouldn't be enough. Cascading foreign keys remove fasts and reminders, every session is deleted, and a reminder job already queued finds its reminder gone and does nothing.
+- **Deleting an account needs the current password.** It can't be undone, and a session left open on a shared device shouldn't be enough. Cascading foreign keys remove fasts and reminders, every session is deleted, and a reminder job already queued finds its reminder gone and does nothing. A queued email, such as a confirmation sent just before the account was deleted, stores only its user's ID. When the user is gone the job is dropped quietly, so it's neither sent to the deleted address nor counted as a failure.
 
 ## Trade-off
 

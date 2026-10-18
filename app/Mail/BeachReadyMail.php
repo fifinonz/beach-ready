@@ -6,6 +6,7 @@ use App\Consent\EmailLinks;
 use App\Models\User;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Headers;
+use Illuminate\Queue\SerializesModels;
 
 /**
  * Every Beach Ready email extends this. It adds the one-click unsubscribe
@@ -14,6 +15,17 @@ use Illuminate\Mail\Mailables\Headers;
  */
 abstract class BeachReadyMail extends Mailable
 {
+    // A queued email stores only the IDs of its models and loads them when
+    // it's sent, so it never goes to an account deleted in the meantime.
+    use SerializesModels;
+
+    /**
+     * If its user was deleted before it was sent, the queued email is
+     * dropped quietly. It isn't a failure, so it shouldn't raise a
+     * failed-job alert.
+     */
+    public bool $deleteWhenMissingModels = true;
+
     /**
      * The person this email is for.
      */
