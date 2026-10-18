@@ -122,13 +122,16 @@ Read `CLAUDE.md` before every stage.
 
 ---
 
-## Stage 6: CI and deployment
+## Stage 6: Demo account and monitoring
 
-> Read CLAUDE.md. Set up CI and deployment.
+CI and deployment moved to Stage 2.5. This stage gets the live app ready for visitors.
+
+> Read CLAUDE.md and `docs/deployment.md`. Prepare the live app for reviewers and keep an eye on it.
 >
-> - A GitHub Actions workflow that runs Pint, the Pest tests and the front-end build on every push and pull request.
-> - A Deployer recipe to deploy to an Ubuntu VPS over SSH, with secrets in GitHub Actions secrets, never in the repo.
-> - Document the server setup in `docs/deployment.md`: Nginx, PHP-FPM, PostgreSQL, a Supervisor-managed queue worker, the scheduler cron entry, and HTTPS.
+> - A demo account that reviewers can log in to, with a realistic few weeks of fasting history. It resets on a schedule so one visitor's changes don't greet the next, and it never sends real email.
+> - Uptime monitoring of the `/up` health check, with an alert when it fails.
+> - Alerts for failed jobs, so a reminder that fails all of its retries is noticed rather than sitting in `failed_jobs`.
+> - Document any new Laravel Cloud settings in `docs/deployment.md`. Ask me before adding a package or an external service.
 > - Update the README with the live demo link and tick everything that's done.
 >
 > Stop and summarise.
