@@ -28,19 +28,30 @@ class UserFactory extends Factory
             'first_name' => fake()->firstName(),
             'email' => fake()->unique()->safeEmail(),
             'timezone' => 'Africa/Nairobi',
-            'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * New users haven't confirmed their address, like real sign-ups. This
+     * state is a user who has.
      */
-    public function unverified(): static
+    public function confirmed(): static
     {
         return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
+            'email_verified_at' => now(),
+            'confirmation_sent_at' => now(),
+        ]);
+    }
+
+    /**
+     * A user who turned on fasting reminder emails and confirmed the address.
+     */
+    public function receivingReminders(): static
+    {
+        return $this->confirmed()->state(fn (array $attributes) => [
+            'email_fasting_reminders' => true,
         ]);
     }
 }
