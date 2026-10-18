@@ -8,4 +8,5 @@ it('refuses guests', function (string $method, string $uri) {
     ['GET', '/api/fasts/active'],
     ['PATCH', '/api/fasts/active'],
     ['POST', '/api/fasts/active/end'],
+    ['GET', '/api/stats/week'],
 ]);

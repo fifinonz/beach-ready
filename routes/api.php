@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Fasts\ActiveFastController;
 use App\Http\Controllers\Fasts\FastController;
+use App\Http\Controllers\Fasts\WeeklyStatsController;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -20,4 +21,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/fasts/active', [ActiveFastController::class, 'show']);
     Route::patch('/fasts/active', [ActiveFastController::class, 'update']);
     Route::post('/fasts/active/end', [ActiveFastController::class, 'end']);
+    Route::get('/stats/week', WeeklyStatsController::class);
 });
