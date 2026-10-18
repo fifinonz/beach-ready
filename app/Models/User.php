@@ -51,6 +51,7 @@ class User extends Authenticatable
             'email_weekly_summary' => 'boolean',
             'email_product_news' => 'boolean',
             'confirmation_sent_at' => 'immutable_datetime',
+            'fasting_hours' => 'integer',
         ];
     }
 

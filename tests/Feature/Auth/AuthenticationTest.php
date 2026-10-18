@@ -51,6 +51,9 @@ it('returns the current user', function () {
             'email' => $user->email,
             'timezone' => $user->timezone,
             'email_confirmed' => false,
+            'fasting_hours' => null,
+            'why' => null,
+            'member_since' => $user->created_at->toIso8601ZuluString(),
         ]]);
 });
 
