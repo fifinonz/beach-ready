@@ -86,6 +86,16 @@ class Fast extends Model
     }
 
     /**
+     * Switches to another protocol, such as 16:8 to 18:6. Call startAt()
+     * afterwards to move the goal.
+     */
+    public function changeProtocol(int $fastingHours): void
+    {
+        $this->fasting_hours = $fastingHours;
+        $this->eating_hours = self::HOURS_IN_DAY - $fastingHours;
+    }
+
+    /**
      * Moves the start time and keeps the goal the same number of hours after it.
      */
     public function startAt(CarbonImmutable $startedAt): void

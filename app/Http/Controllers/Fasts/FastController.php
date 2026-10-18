@@ -37,11 +37,8 @@ class FastController extends Controller
 
         abort_if($user->activeFast()->exists(), 409, 'You already have a fast in progress.');
 
-        $fastingHours = $request->integer('fasting_hours');
-        $fast = new Fast([
-            'fasting_hours' => $fastingHours,
-            'eating_hours' => Fast::HOURS_IN_DAY - $fastingHours,
-        ]);
+        $fast = new Fast;
+        $fast->changeProtocol($request->integer('fasting_hours'));
         $fast->startAt($request->startedAt());
 
         try {
