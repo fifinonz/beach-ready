@@ -7,6 +7,7 @@ import ChooseProtocol from './screens/ChooseProtocol.vue';
 import TodayScreen from './screens/TodayScreen.vue';
 import HistoryScreen from './screens/HistoryScreen.vue';
 import ProfileScreen from './screens/ProfileScreen.vue';
+import RemindersScreen from './screens/RemindersScreen.vue';
 
 /*
  * Screens for visitors (`guest`) and for signed-in people (`auth`). Screens
@@ -18,7 +19,7 @@ const routes = [
     { path: '/protocol', component: ChooseProtocol, meta: { auth: true, title: 'Choose a protocol' } },
     { path: '/', component: TodayScreen, meta: { auth: true, title: 'Today' } },
     { path: '/history', component: HistoryScreen, meta: { auth: true, title: 'History' } },
-    { path: '/reminders', component: NotBuiltYet, meta: { auth: true, title: 'Reminders' } },
+    { path: '/reminders', component: RemindersScreen, meta: { auth: true, title: 'Reminders' } },
     { path: '/profile', component: ProfileScreen, meta: { auth: true, title: 'Profile' } },
     { path: '/settings', component: NotBuiltYet, meta: { auth: true, title: 'Settings' } },
     { path: '/:path(.*)*', redirect: '/' },
