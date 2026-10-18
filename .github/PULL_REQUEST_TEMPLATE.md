@@ -8,7 +8,7 @@
 
 ## Verification
 
-- [ ] Tests pass locally (and in CI, once Stage 6 adds it)
+- [ ] Tests pass locally and in CI
 - [ ] Code style passes (Pint)
 - [ ] No secrets are included; new environment variables are documented in `.env.example`
 - [ ] Domain rules in `CLAUDE.md` still hold

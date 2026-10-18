@@ -16,7 +16,7 @@ How work moves from an idea to `main` in this repo. Claude Code follows this fil
 
 Lower case, words joined with hyphens, short and descriptive.
 
-- Stages: `stage-0-environment`, `stage-1-fasting-api`, `stage-2-reminders`, `stage-3-consent`, `stage-4-abuse-protection`, `stage-5-frontend`, `stage-6-deployment`
+- Stages: `stage-0-environment`, `stage-1-fasting-api`, `stage-2-reminders`, `stage-2-5-ci-deployment`, `stage-3-consent`, `stage-4-abuse-protection`, `stage-5-frontend`, `stage-6-demo-and-monitoring`
 - Others: `fix/timer-drift-on-resume`, `docs/reminder-decision-note`, `chore/upgrade-laravel`
 
 ## Commits
@@ -60,7 +60,7 @@ Lower case, words joined with hyphens, short and descriptive.
 
 Before merging any pull request:
 
-- [ ] Tests pass locally (and in CI, once Stage 6 adds it)
+- [ ] Tests pass locally and in CI
 - [ ] Code style passes (Pint)
 - [ ] No secrets, and every new environment variable is in `.env.example`
 - [ ] The domain rules in `CLAUDE.md` still hold
@@ -76,4 +76,4 @@ Before merging any pull request:
 
 ## Branch protection
 
-After Stage 6 adds CI, protect `main` in **Settings → Rules**: require a pull request before merging, require the CI checks to pass, and block force pushes. Until then, the rules above are enforced by habit.
+CI runs on every push and pull request (Stage 2.5). Protect `main` in **Settings → Rules**: require a pull request before merging, require the **Code style** and **Tests** checks to pass, and block force pushes. Laravel Cloud deploys every push to `main`, so this is what stops untested code going live.

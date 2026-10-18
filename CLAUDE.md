@@ -31,7 +31,8 @@ The owner, Muthoni, is the reviewer of every change. You are the pair programmer
 | Local environment | Lando, Laravel recipe |
 | Tests | Pest |
 | Code style | Laravel Pint |
-| Deployment | GitHub Actions and Deployer to an Ubuntu VPS |
+| CI | GitHub Actions: Pint and every test suite on PostgreSQL 17 |
+| Deployment | Laravel Cloud with Serverless Postgres 17 (see `docs/deployment.md`) |
 
 ## Domain rules
 
