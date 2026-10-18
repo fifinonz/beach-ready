@@ -13,6 +13,7 @@ The owner, Muthoni, is the reviewer of every change. You are the pair programmer
 - **Ask before adding any package** that isn't named in this file. Say what it's for and what the alternative is.
 - **Write tests as you go** with Pest. Every behaviour in the stage gets a test, especially time and scheduling logic.
 - **Record real decisions** in `docs/decisions/` as short numbered notes (`0001-store-times-in-utc.md`): the context, the decision, the trade-off. Only for choices someone might reasonably question.
+- **Once a migration is merged to main, never edit it.** Add a new migration instead.
 - **Never commit secrets.** Real values live in `.env`, which is git-ignored. Every new environment variable is added to `.env.example` with a placeholder and a one-line comment.
 - **Keep the README honest.** When a feature is finished and tested, tick it in the README checklist. Never tick anything early.
 
