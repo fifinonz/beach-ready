@@ -85,6 +85,39 @@ it('refuses a start time more than 24 hours ago', function (string $startedAt) {
     'a week ago' => '2026-10-11T21:00',
 ]);
 
+it('refuses a start time before the previous fast ended', function () {
+    // The previous fast ended at 18:00 Nairobi time.
+    Fast::factory()->for($this->user)->between('2026-10-18 02:00', '2026-10-18 15:00')->create();
+
+    $this->postJson('/api/fasts', ['fasting_hours' => 16, 'started_at' => '2026-10-18T17:59'])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['started_at' => "The start time can't be before your last fast ended."]);
+});
+
+it('accepts a start time right when the previous fast ended', function () {
+    Fast::factory()->for($this->user)->between('2026-10-18 02:00', '2026-10-18 15:00')->create();
+
+    $this->postJson('/api/fasts', ['fasting_hours' => 16, 'started_at' => '2026-10-18T18:00'])
+        ->assertCreated()
+        ->assertJsonPath('data.started_at', '2026-10-18T15:00:00Z');
+});
+
+it('checks against the most recent fast, not an older one', function () {
+    Fast::factory()->for($this->user)->between('2026-10-17 01:00', '2026-10-17 17:00')->create();
+    Fast::factory()->for($this->user)->between('2026-10-18 02:00', '2026-10-18 15:00')->create();
+
+    $this->postJson('/api/fasts', ['fasting_hours' => 16, 'started_at' => '2026-10-18T17:00'])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('started_at');
+});
+
+it('ignores other users\' fasts when checking for overlap', function () {
+    Fast::factory()->between('2026-10-18 02:00', '2026-10-18 15:00')->create();
+
+    $this->postJson('/api/fasts', ['fasting_hours' => 16, 'started_at' => '2026-10-18T17:00'])
+        ->assertCreated();
+});
+
 it('refuses a start time that is not a date', function () {
     $this->postJson('/api/fasts', ['fasting_hours' => 16, 'started_at' => 'not a date'])
         ->assertUnprocessable()

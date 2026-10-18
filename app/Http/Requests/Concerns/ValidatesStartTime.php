@@ -9,7 +9,8 @@ use Illuminate\Validation\Validator;
 /**
  * Shared by the requests that set a fast's start time. The time may be sent
  * with or without a UTC offset (see User::localTimeToUtc). It can't be in the
- * future or more than 24 hours ago.
+ * future, more than 24 hours ago, or before the user's previous fast ended,
+ * so fasts never overlap.
  */
 trait ValidatesStartTime
 {
@@ -41,6 +42,12 @@ trait ValidatesStartTime
 
         if ($startedAt->lt($now->subHours(Fast::MAX_BACKDATE_HOURS))) {
             return "The start time can't be more than 24 hours ago.";
+        }
+
+        $previousFastEndedAt = $this->user()->fasts()->ended()->latest('ended_at')->value('ended_at');
+
+        if ($previousFastEndedAt !== null && $startedAt->lt($previousFastEndedAt)) {
+            return "The start time can't be before your last fast ended.";
         }
 
         return null;

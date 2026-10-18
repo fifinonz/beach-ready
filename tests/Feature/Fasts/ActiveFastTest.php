@@ -74,6 +74,27 @@ describe('edit the start time', function () {
         expect($fast->fresh()->started_at)->toEqual($fast->started_at);
     });
 
+    it('refuses moving the start time before the previous fast ended', function () {
+        // The previous fast ended at 18:00 Nairobi time.
+        Fast::factory()->for($this->user)->between('2026-10-18 02:00', '2026-10-18 15:00')->create();
+        $fast = Fast::factory()->for($this->user)->create(['started_at' => '2026-10-18 16:00:00']);
+
+        $this->patchJson('/api/fasts/active', ['started_at' => '2026-10-18T17:30'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['started_at' => "The start time can't be before your last fast ended."]);
+
+        expect($fast->fresh()->started_at)->toEqual($fast->started_at);
+    });
+
+    it('accepts moving the start time back to when the previous fast ended', function () {
+        Fast::factory()->for($this->user)->between('2026-10-18 02:00', '2026-10-18 15:00')->create();
+        Fast::factory()->for($this->user)->create(['started_at' => '2026-10-18 16:00:00']);
+
+        $this->patchJson('/api/fasts/active', ['started_at' => '2026-10-18T18:00'])
+            ->assertOk()
+            ->assertJsonPath('data.started_at', '2026-10-18T15:00:00Z');
+    });
+
     it('requires a start time', function () {
         Fast::factory()->for($this->user)->create();
 
