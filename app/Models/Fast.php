@@ -30,6 +30,12 @@ class Fast extends Model
 
     public const MAX_FASTING_HOURS = 20;
 
+    /**
+     * How far back a start time can be set, for a fast someone forgot to
+     * start on time.
+     */
+    public const MAX_BACKDATE_HOURS = 24;
+
     public const HOURS_IN_DAY = 24;
 
     protected $attributes = [

@@ -69,6 +69,22 @@ it('refuses a start time in the future', function (string $startedAt) {
     'UTC, one minute ahead' => '2026-10-18T18:01:00Z',
 ]);
 
+it('accepts a start time up to 24 hours ago', function () {
+    $this->postJson('/api/fasts', ['fasting_hours' => 16, 'started_at' => '2026-10-17T21:00'])
+        ->assertCreated()
+        ->assertJsonPath('data.started_at', '2026-10-17T18:00:00Z');
+});
+
+it('refuses a start time more than 24 hours ago', function (string $startedAt) {
+    $this->postJson('/api/fasts', ['fasting_hours' => 16, 'started_at' => $startedAt])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['started_at' => "The start time can't be more than 24 hours ago."]);
+})->with([
+    'local time, one minute too early' => '2026-10-17T20:59',
+    'UTC, one minute too early' => '2026-10-17T17:59:00Z',
+    'a week ago' => '2026-10-11T21:00',
+]);
+
 it('refuses a start time that is not a date', function () {
     $this->postJson('/api/fasts', ['fasting_hours' => 16, 'started_at' => 'not a date'])
         ->assertUnprocessable()

@@ -2,13 +2,14 @@
 
 namespace App\Http\Requests\Concerns;
 
+use App\Models\Fast;
 use Carbon\CarbonImmutable;
 use Illuminate\Validation\Validator;
 
 /**
  * Shared by the requests that set a fast's start time. The time may be sent
- * with or without a UTC offset (see User::localTimeToUtc), and can't be in
- * the future.
+ * with or without a UTC offset (see User::localTimeToUtc). It can't be in the
+ * future or more than 24 hours ago.
  */
 trait ValidatesStartTime
 {
@@ -23,11 +24,26 @@ trait ValidatesStartTime
                     return;
                 }
 
-                if ($this->startedAt()->isFuture()) {
-                    $validator->errors()->add('started_at', "The start time can't be in the future.");
+                $problem = $this->startTimeProblem($this->startedAt(), CarbonImmutable::now());
+
+                if ($problem !== null) {
+                    $validator->errors()->add('started_at', $problem);
                 }
             },
         ];
+    }
+
+    private function startTimeProblem(CarbonImmutable $startedAt, CarbonImmutable $now): ?string
+    {
+        if ($startedAt->gt($now)) {
+            return "The start time can't be in the future.";
+        }
+
+        if ($startedAt->lt($now->subHours(Fast::MAX_BACKDATE_HOURS))) {
+            return "The start time can't be more than 24 hours ago.";
+        }
+
+        return null;
     }
 
     public function startedAt(): CarbonImmutable

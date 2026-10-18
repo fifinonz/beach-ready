@@ -56,6 +56,24 @@ describe('edit the start time', function () {
         expect($fast->fresh()->started_at)->toEqual($fast->started_at);
     });
 
+    it('accepts a start time up to 24 hours ago', function () {
+        Fast::factory()->for($this->user)->create();
+
+        $this->patchJson('/api/fasts/active', ['started_at' => '2026-10-17T21:00'])
+            ->assertOk()
+            ->assertJsonPath('data.started_at', '2026-10-17T18:00:00Z');
+    });
+
+    it('refuses a start time more than 24 hours ago', function () {
+        $fast = Fast::factory()->for($this->user)->create();
+
+        $this->patchJson('/api/fasts/active', ['started_at' => '2026-10-17T20:59'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['started_at' => "The start time can't be more than 24 hours ago."]);
+
+        expect($fast->fresh()->started_at)->toEqual($fast->started_at);
+    });
+
     it('requires a start time', function () {
         Fast::factory()->for($this->user)->create();
 
