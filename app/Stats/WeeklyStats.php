@@ -40,9 +40,14 @@ class WeeklyStats
     }
 
     /**
-     * Consecutive days with at least one finished fast, counting back from
-     * today. A streak stays alive through today until midnight, so if nothing
-     * has ended yet today it counts back from yesterday.
+     * How many rest days in a row a streak survives. See decision 0003.
+     */
+    private const REST_DAYS_ALLOWED = 1;
+
+    /**
+     * The number of days with a finished fast in the current streak, counting
+     * back from today. A single rest day doesn't break a streak; two in a row
+     * do. Today doesn't count as a rest day until it's over.
      */
     private static function streak(User $user, CarbonImmutable $localNow): int
     {
@@ -59,9 +64,16 @@ class WeeklyStats
         }
 
         $streak = 0;
+        $restDaysInARow = 0;
 
-        while ($daysWithAFast->has($day->toDateString())) {
-            $streak++;
+        while ($restDaysInARow <= self::REST_DAYS_ALLOWED) {
+            if ($daysWithAFast->has($day->toDateString())) {
+                $streak++;
+                $restDaysInARow = 0;
+            } else {
+                $restDaysInARow++;
+            }
+
             $day = $day->subDay();
         }
 

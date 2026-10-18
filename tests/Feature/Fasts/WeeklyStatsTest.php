@@ -68,24 +68,56 @@ it('keeps the streak alive until the end of today', function () {
     $this->getJson('/api/stats/week')->assertJsonPath('data.current_streak_days', 2);
 });
 
-it('restarts the streak after a day without a finished fast', function () {
+it('keeps the streak through a single rest day, without counting it', function () {
+    finishedFast($this->user, '2026-10-17 02:00', '2026-10-17 18:00'); // Saturday
     finishedFast($this->user, '2026-10-18 02:00', '2026-10-18 18:00'); // Sunday
+    // Monday is a rest day.
     finishedFast($this->user, '2026-10-20 02:00', '2026-10-20 18:00'); // Tuesday
+
+    $this->getJson('/api/stats/week')->assertJsonPath('data.current_streak_days', 3);
+});
+
+it('keeps the streak through more than one separate rest day', function () {
+    finishedFast($this->user, '2026-10-15 02:00', '2026-10-15 18:00'); // Thursday
+    // Friday is a rest day.
+    finishedFast($this->user, '2026-10-17 02:00', '2026-10-17 18:00'); // Saturday
+    // Sunday is a rest day.
+    finishedFast($this->user, '2026-10-19 02:00', '2026-10-19 18:00'); // Monday
+    finishedFast($this->user, '2026-10-21 02:00', '2026-10-21 08:00'); // Wednesday, after Tuesday's rest
+
+    $this->getJson('/api/stats/week')->assertJsonPath('data.current_streak_days', 4);
+});
+
+it('breaks the streak after two rest days in a row', function () {
+    finishedFast($this->user, '2026-10-16 02:00', '2026-10-16 18:00'); // Friday
+    // Saturday and Sunday are rest days.
+    finishedFast($this->user, '2026-10-19 02:00', '2026-10-19 18:00'); // Monday
+    finishedFast($this->user, '2026-10-20 02:00', '2026-10-20 18:00'); // Tuesday
+
+    $this->getJson('/api/stats/week')->assertJsonPath('data.current_streak_days', 2);
+});
+
+it('keeps the streak alive when the only rest day so far is yesterday', function () {
+    finishedFast($this->user, '2026-10-19 02:00', '2026-10-19 18:00'); // Monday
+    // Tuesday is a rest day, and nothing has ended yet today.
 
     $this->getJson('/api/stats/week')->assertJsonPath('data.current_streak_days', 1);
 });
 
-it('has no streak when the last fast ended before yesterday', function () {
+it('has no streak after two full rest days', function () {
     finishedFast($this->user, '2026-10-18 02:00', '2026-10-18 18:00'); // Sunday
+    // Monday and Tuesday are rest days.
 
     $this->getJson('/api/stats/week')->assertJsonPath('data.current_streak_days', 0);
 });
 
 it('counts streak days in the user\'s time zone', function () {
-    // Ends 01:00 Tuesday in Nairobi, which is Monday in UTC.
-    finishedFast($this->user, '2026-10-19 06:00', '2026-10-19 22:00');
-    // Ends 10:00 Wednesday in Nairobi.
-    finishedFast($this->user, '2026-10-20 15:00', '2026-10-21 07:00');
+    // Both of these end on Monday in UTC, but on different days in Nairobi:
+    // 22:00 Monday and 02:00 Tuesday. Counted in UTC they'd be one day.
+    finishedFast($this->user, '2026-10-19 03:00', '2026-10-19 19:00');
+    finishedFast($this->user, '2026-10-19 19:30', '2026-10-19 23:00');
+    // Ends 11:00 Wednesday in Nairobi.
+    finishedFast($this->user, '2026-10-20 16:00', '2026-10-21 08:00');
 
-    $this->getJson('/api/stats/week')->assertJsonPath('data.current_streak_days', 2);
+    $this->getJson('/api/stats/week')->assertJsonPath('data.current_streak_days', 3);
 });
