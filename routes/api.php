@@ -12,10 +12,12 @@ use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/register', [RegisteredUserController::class, 'store']);
-Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+Route::post('/register', [RegisteredUserController::class, 'store'])
+    ->middleware(['throttle:register', 'honeypot']);
+Route::post('/login', [AuthenticatedSessionController::class, 'store'])
+    ->middleware('throttle:login');
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
     Route::get('/user', fn (Request $request) => UserResource::make($request->user()));
 
@@ -31,8 +33,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/settings/email', [EmailSettingsController::class, 'show']);
     Route::patch('/settings/email', [EmailSettingsController::class, 'update']);
-    Route::post('/settings/email/confirmation', [EmailSettingsController::class, 'resendConfirmation']);
+    Route::post('/settings/email/confirmation', [EmailSettingsController::class, 'resendConfirmation'])
+        ->middleware('throttle:confirmation-resend');
 
     Route::get('/account/export', [AccountController::class, 'export']);
-    Route::delete('/account', [AccountController::class, 'destroy']);
+    Route::delete('/account', [AccountController::class, 'destroy'])
+        ->middleware('throttle:account-delete');
 });
