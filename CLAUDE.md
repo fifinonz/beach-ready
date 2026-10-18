@@ -55,9 +55,13 @@ Screen designs are in `docs/design/`, one PNG per screen, numbered in flow order
 
 Fill this in during stage 0, once the commands are confirmed to work, so later sessions can rely on it:
 
-- Start the environment: `lando start`
-- Run tests:
-- Run code style:
-- Run the queue worker:
-- Run the scheduler:
-- Front-end dev server:
+- Start the environment: `lando start` (URLs: `lando info`)
+- Run tests: `lando test`
+- Run code style: `lando pint` (check only: `lando pint --test`)
+- Run the queue worker: `lando queue`
+- Run the scheduler: `lando schedule`
+- Front-end dev server: `lando npm run dev`
+- Production front-end build: `lando npm run build`
+- Artisan and Composer: `lando artisan ...`, `lando composer ...`
+
+Tests run against the `beach_ready_testing` PostgreSQL database (set in `phpunit.xml`), so they need Lando running. See `docs/decisions/0001-test-against-postgresql.md`.

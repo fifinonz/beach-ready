@@ -101,6 +101,7 @@ Read `CLAUDE.md` before every stage.
 > - Accessible as built: real buttons and links, labelled inputs, switches with `role="switch"`, visible focus states.
 > - Make it an installable PWA with a manifest and service worker. Ask me before installing a package for it.
 > - Use the brand colours and Fira Sans from CLAUDE.md.
+> - Decide whether to keep or remove the skeleton's Tailwind, concurrently and @laravel/multiplex.
 >
 > Do this in sub-steps, one screen at a time, and stop after each screen for review.
 

@@ -47,11 +47,32 @@ Each of these will get a short write-up here as it's built.
 
 ## Running it locally
 
-Setup instructions will be added once the Lando environment is in place. The aim is that a fresh clone runs with:
+You need [Lando](https://docs.lando.dev/install/) and Docker. Everything else (PHP 8.4, PostgreSQL, Node and Mailpit) runs in containers.
 
 ```bash
+git clone https://github.com/fifinonz/beach-ready.git
+cd beach-ready
+cp .env.example .env
 lando start
+lando composer install
+lando artisan key:generate
+lando artisan migrate
+lando npm run build
 ```
+
+Open the app at the URL `lando start` prints, normally https://beach-ready.lndo.site. Emails the app sends are caught by Mailpit at https://mail.beach-ready.lndo.site.
+
+If something else on your machine already uses ports 80 and 443, Lando serves on another port (for example http://beach-ready.lndo.site:8080). Set `APP_URL` in `.env` to the exact URL it prints, or Vite's dev server will refuse the browser's requests.
+
+Day-to-day commands:
+
+| Task | Command |
+|---|---|
+| Run the tests | `lando test` |
+| Check code style | `lando pint --test` (drop `--test` to fix) |
+| Front-end dev server with hot reload | `lando npm run dev` |
+| Queue worker | `lando queue` |
+| Scheduler | `lando schedule` |
 
 ## Design
 
@@ -66,7 +87,7 @@ I'm building Beach Ready with [Claude Code](https://docs.claude.com/en/docs/clau
 ## Author
 
 **Muthoni Nguthi**, engineer and technical lead, Nairobi.
-[Portfolio](https://muthoni-nguthi.subscribepage.io) · [LinkedIn]([https://www.linkedin.com/in/mnguthi/])
+[Portfolio](https://muthoni-nguthi.subscribepage.io) · [LinkedIn](https://www.linkedin.com/in/mnguthi/)
 
 ## Copyright
 
