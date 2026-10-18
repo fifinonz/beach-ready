@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Fasts\ActiveFastController;
@@ -31,4 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/settings/email', [EmailSettingsController::class, 'show']);
     Route::patch('/settings/email', [EmailSettingsController::class, 'update']);
     Route::post('/settings/email/confirmation', [EmailSettingsController::class, 'resendConfirmation']);
+
+    Route::get('/account/export', [AccountController::class, 'export']);
+    Route::delete('/account', [AccountController::class, 'destroy']);
 });
