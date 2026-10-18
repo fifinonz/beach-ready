@@ -4,6 +4,10 @@ import AppIcon from './AppIcon.vue';
 import BrandMark from './BrandMark.vue';
 import { network } from '../network.js';
 
+// Today and History use the full width on desktop. Other screens sit in a
+// centred column beside the sidebar.
+defineProps({ wide: { type: Boolean, default: false } });
+
 /*
  * The frame around every signed-in screen. Phones get a tab bar at the
  * bottom; from 1024px wide it becomes a sidebar on the left, with Settings
@@ -35,7 +39,7 @@ const tabs = [
             </RouterLink>
         </nav>
 
-        <div class="content">
+        <div class="content" :class="{ 'content--narrow': !wide }">
             <p v-if="!network.online" class="offline" role="status">
                 <AppIcon name="offline" />
                 You're offline. Your timer keeps running; saving changes needs a connection.
@@ -168,6 +172,12 @@ const tabs = [
         max-width: none;
         margin: 0;
         padding: 0 48px 48px;
+    }
+
+    .content--narrow > :deep(*) {
+        max-width: 36rem;
+        margin-left: auto;
+        margin-right: auto;
     }
 }
 </style>

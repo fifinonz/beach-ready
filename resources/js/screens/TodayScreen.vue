@@ -177,7 +177,7 @@ const days = computed(() => recentDays({ fasts: history.value, timeZone: timeZon
 </script>
 
 <template>
-    <AppLayout>
+    <AppLayout wide>
         <PageHeader :eyebrow="`Hi ${user.first_name}`" :title="fast ? `You're fasting` : 'Ready when you are'" />
 
         <div v-if="loaded" class="today">

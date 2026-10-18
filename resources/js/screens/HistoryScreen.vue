@@ -53,7 +53,7 @@ const streakDays = computed(() => stats.value?.current_streak_days ?? 0);
 </script>
 
 <template>
-    <AppLayout>
+    <AppLayout wide>
         <PageHeader title="History">
             <p v-if="saved" class="saved saved--desktop" role="status">
                 <AppIcon name="check" /><span><strong>Fast saved: {{ saved }}.</strong> Nice work.</span>
