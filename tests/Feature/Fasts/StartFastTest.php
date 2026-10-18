@@ -26,7 +26,7 @@ it('starts a fast now when no start time is given', function () {
     expect($this->user->activeFast)->not->toBeNull();
 });
 
-it('supports the preset protocols and custom hours up to 20', function (int $fastingHours, string $protocol) {
+it('supports the preset protocols and custom hours from 12 to 20', function (int $fastingHours, string $protocol) {
     $this->postJson('/api/fasts', ['fasting_hours' => $fastingHours])
         ->assertCreated()
         ->assertJsonPath('data.protocol', $protocol);
@@ -34,17 +34,18 @@ it('supports the preset protocols and custom hours up to 20', function (int $fas
     '14:10' => [14, '14:10'],
     '16:8' => [16, '16:8'],
     '18:6' => [18, '18:6'],
-    'custom 13 hours' => [13, '13:11'],
+    'custom at the minimum' => [12, '12:12'],
+    'custom 15 hours' => [15, '15:9'],
     'custom at the cap' => [20, '20:4'],
 ]);
 
-it('refuses fasting hours outside 1 to 20', function (mixed $fastingHours) {
+it('refuses fasting hours outside 12 to 20', function (mixed $fastingHours) {
     $this->postJson('/api/fasts', ['fasting_hours' => $fastingHours])
         ->assertUnprocessable()
         ->assertJsonValidationErrors('fasting_hours');
 
     expect(Fast::count())->toBe(0);
-})->with([21, 24, 0, -1, 12.5, 'sixteen', null]);
+})->with([11, 1, 0, -1, 21, 24, 12.5, 'sixteen', null]);
 
 it('reads a start time without an offset in the user\'s time zone', function () {
     $this->postJson('/api/fasts', ['fasting_hours' => 16, 'started_at' => '2026-10-18T20:30'])
@@ -102,6 +103,6 @@ it('has the database refuse a second active fast for the same user', function ()
     Fast::factory()->for($this->user)->create();
 })->throws(UniqueConstraintViolationException::class);
 
-it('has the database refuse a fast over 20 hours', function () {
-    Fast::factory()->for($this->user)->create(['fasting_hours' => 21]);
-})->throws(QueryException::class, 'fasts_fasting_hours_range');
+it('has the database refuse a fast outside 12 to 20 hours', function (int $fastingHours) {
+    Fast::factory()->for($this->user)->create(['fasting_hours' => $fastingHours]);
+})->throws(QueryException::class, 'fasts_fasting_hours_range')->with([11, 21]);

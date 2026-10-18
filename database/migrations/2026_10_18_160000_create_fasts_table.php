@@ -29,8 +29,8 @@ return new class extends Migration
         // simultaneous "start" requests can't both succeed.
         DB::statement('CREATE UNIQUE INDEX fasts_one_active_per_user ON fasts (user_id) WHERE ended_at IS NULL');
 
-        // The 20-hour cap is a product rule, so the database holds it too.
-        DB::statement('ALTER TABLE fasts ADD CONSTRAINT fasts_fasting_hours_range CHECK (fasting_hours BETWEEN 1 AND 20)');
+        // The 12 to 20 hour range is a product rule, so the database holds it too.
+        DB::statement('ALTER TABLE fasts ADD CONSTRAINT fasts_fasting_hours_range CHECK (fasting_hours BETWEEN 12 AND 20)');
     }
 
     public function down(): void

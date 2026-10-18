@@ -12,14 +12,14 @@ class StartFastRequest extends FormRequest
 
     /**
      * 14:10, 16:8 and 18:6 are sent as 14, 16 and 18 fasting hours. Custom
-     * fasts can be any whole number of hours up to the cap.
+     * fasts can be any whole number of hours from 12 up to the 20-hour cap.
      *
      * @return array<string, mixed>
      */
     public function rules(): array
     {
         return [
-            'fasting_hours' => ['required', 'integer', 'between:1,'.Fast::MAX_FASTING_HOURS],
+            'fasting_hours' => ['required', 'integer', 'between:'.Fast::MIN_FASTING_HOURS.','.Fast::MAX_FASTING_HOURS],
             'started_at' => ['nullable', 'string', 'date'],
         ];
     }

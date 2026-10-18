@@ -23,9 +23,11 @@ class Fast extends Model
     use HasFactory;
 
     /**
-     * The longest fast anyone can set, in hours. Protocols are a fasting
-     * window followed by an eating window, adding up to a 24-hour day.
+     * The shortest and longest fast anyone can set, in hours. Protocols are a
+     * fasting window followed by an eating window, adding up to a 24-hour day.
      */
+    public const MIN_FASTING_HOURS = 12;
+
     public const MAX_FASTING_HOURS = 20;
 
     public const HOURS_IN_DAY = 24;
