@@ -1,6 +1,6 @@
 # Beach Ready: build plan
 
-Seven stages. Paste one stage's prompt into Claude Code, review the result, then move on. Each stage ends with working, tested, committed code.
+Eight stages. Paste one stage's prompt into Claude Code, review the result, then move on. Each stage ends with working, tested, committed code.
 
 Read `CLAUDE.md` before every stage.
 
@@ -48,6 +48,20 @@ Read `CLAUDE.md` before every stage.
 > - Tests: rescheduling, cancelling, idempotency, and a daylight saving change in a time zone that has one (for example `Europe/London`).
 >
 > Write a decision note comparing this design with dispatching delayed jobs directly. Stop and summarise.
+
+---
+
+## Stage 2.5: CI and deployment
+
+> Read CLAUDE.md. Set up CI and prepare for deployment to Laravel Cloud, so every stage from here on is tested by CI before it's merged.
+>
+> 1. Move Lando from PostgreSQL 16 to 17 to match Laravel Cloud, and confirm all tests pass.
+> 2. A GitHub Actions workflow that runs Pint and every test suite, including Concurrency, against a PostgreSQL 17 service on every push and pull request.
+> 3. Prepare the app for Laravel Cloud: document in `docs/deployment.md` the environment variables, the scheduler, the queue, and the database setup. I'll create the Laravel Cloud project and connect GitHub myself, so tell me exactly what to configure in its dashboard.
+> 4. Write a decision note on choosing Laravel Cloud over a VPS.
+> 5. Update Stage 6 in the build plan: it now covers the demo account, uptime monitoring and failed-job alerts, since deployment moves here.
+>
+> Commit in logical steps, then stop.
 
 ---
 
