@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { api, ApiError, OfflineError } from './api.js';
+import { network } from './network.js';
 
 function jsonResponse(status, body) {
     return new Response(body === null ? null : JSON.stringify(body), {
@@ -74,5 +75,15 @@ describe('api', () => {
         vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
 
         await expect(api('GET', '/user')).rejects.toBeInstanceOf(OfflineError);
+    });
+
+    it('marks the app offline when a request can\'t get through, and online again when one does', async () => {
+        vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
+        await api('GET', '/user').catch(() => {});
+        expect(network.online).toBe(false);
+
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(200, { data: {} })));
+        await api('GET', '/user');
+        expect(network.online).toBe(true);
     });
 });

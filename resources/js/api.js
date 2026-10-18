@@ -1,3 +1,5 @@
+import { network } from './network.js';
+
 /**
  * Talks to the Laravel API with Sanctum's cookie-based SPA authentication:
  * the session cookie is sent automatically, and every request that changes
@@ -62,8 +64,13 @@ export async function api(method, path, body = undefined) {
             body: body === undefined ? undefined : JSON.stringify(body),
         });
     } catch {
+        // The browser's own online flag can be wrong (Wi-Fi with no
+        // internet), so a request that can't get through counts too.
+        network.online = false;
         throw new OfflineError();
     }
+
+    network.online = true;
 
     const data = response.status === 204 ? null : await response.json().catch(() => null);
 

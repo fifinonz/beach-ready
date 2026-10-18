@@ -3,6 +3,7 @@ import { RouterLink } from 'vue-router';
 import AppIcon from './AppIcon.vue';
 import BrandMark from './BrandMark.vue';
 import { network } from '../network.js';
+import { dismissInstallHint, pwa } from '../pwa.js';
 
 defineProps({
     // Today and History use the full width on desktop. Other screens sit in
@@ -51,6 +52,12 @@ const tabs = [
             </p>
             <slot />
         </div>
+
+        <aside v-if="pwa.showInstallHint" class="install-hint" aria-label="Install Beach Ready">
+            <AppIcon name="share" />
+            <p>Install Beach Ready: tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>.</p>
+            <button type="button" class="install-hint__close" aria-label="Dismiss" @click="dismissInstallHint">×</button>
+        </aside>
     </div>
 </template>
 
@@ -78,6 +85,41 @@ const tabs = [
 
 .offline .icon {
     flex: none;
+}
+
+.install-hint {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 6px 10px 16px;
+    border-radius: var(--radius);
+    background: var(--deep);
+    color: #fff;
+}
+
+.install-hint .icon {
+    flex: none;
+}
+
+.install-hint p {
+    flex: 1;
+}
+
+.install-hint__close {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: none;
+    color: #fff;
+    font-size: 1.75rem;
+    line-height: 1;
+    cursor: pointer;
 }
 
 /* Phones and tablets: a tab bar along the bottom. */

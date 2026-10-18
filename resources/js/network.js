@@ -1,9 +1,9 @@
 import { reactive } from 'vue';
 
 /**
- * Whether the device is online, for the offline banner and messages. The
- * browser's own flag is the best signal there is; requests that fail
- * anyway raise OfflineError (see api.js).
+ * Whether the device is online, for the offline banner and messages. It
+ * starts from the browser's own flag and follows its online and offline
+ * events; api.js also updates it whenever a request gets through or can't.
  */
 export const network = reactive({ online: navigator.onLine });
 
