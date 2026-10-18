@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\RejectHoneypot;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -20,6 +21,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // Mail clients send one-click unsubscribes (RFC 8058) with no CSRF
         // token. The signed link is the proof instead.
         $middleware->validateCsrfTokens(except: ['email/unsubscribe/*']);
+
+        $middleware->alias(['honeypot' => RejectHoneypot::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
