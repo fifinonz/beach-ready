@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -42,4 +43,12 @@ class User extends Authenticatable
         return $this->hasOne(Fast::class)->whereNull('ended_at');
     }
 
+    /**
+     * Reads a time the user typed. A value with a UTC offset is taken as it
+     * is; one without is read as wall-clock time in the user's time zone.
+     */
+    public function localTimeToUtc(string $value): CarbonImmutable
+    {
+        return CarbonImmutable::parse($value, $this->timezone)->utc();
+    }
 }
