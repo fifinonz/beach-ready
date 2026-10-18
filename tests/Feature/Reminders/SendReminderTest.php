@@ -7,6 +7,7 @@ use App\Mail\ReminderMail;
 use App\Models\Fast;
 use App\Models\Reminder;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Mail;
 
 beforeEach(function () {
@@ -133,6 +134,29 @@ it('leaves the reminder pending for a retry if sending fails', function () {
     expect($reminder->fresh())
         ->status->toBe(ReminderStatus::Pending)
         ->sent_at->toBeNull();
+});
+
+it('cancels a reminder that keeps failing once it is more than 10 minutes late', function () {
+    $reminder = dueReminder($this->fast);
+    Mail::shouldReceive('to')->andThrow(new RuntimeException('SMTP is down'));
+
+    // While it's at most 10 minutes late, each attempt fails and leaves it
+    // pending, so the dispatcher queues it again the next minute.
+    foreach (range(0, 10) as $minutesLate) {
+        $this->travelTo(CarbonImmutable::parse('2026-10-19 10:00:00')->addMinutes($minutesLate));
+
+        expect(fn () => SendReminder::dispatchSync($reminder->id))->toThrow(RuntimeException::class);
+        expect($reminder->fresh()->status)->toBe(ReminderStatus::Pending);
+        expect(Reminder::query()->due(CarbonImmutable::now())->pluck('id')->all())->toBe([$reminder->id]);
+    }
+
+    // Eleven minutes late it's no longer useful, so the next attempt cancels
+    // it without trying to send.
+    $this->travelTo('2026-10-19 10:11:00');
+    SendReminder::dispatchSync($reminder->id);
+
+    expect($reminder->fresh()->status)->toBe(ReminderStatus::Cancelled);
+    expect(Reminder::query()->due(CarbonImmutable::now())->count())->toBe(0);
 });
 
 describe('the email', function () {
