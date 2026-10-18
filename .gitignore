@@ -65,3 +65,9 @@ GoogleService-Info.plist
 /android/.gradle
 /android/local.properties
 /ios/Pods
+
+# ── Laravel scaffold additions ───────────────────────
+/.codex
+/.cursor/
+/public/fonts-manifest.dev.json
+_ide_helper.php
