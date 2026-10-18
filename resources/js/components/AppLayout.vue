@@ -4,9 +4,14 @@ import AppIcon from './AppIcon.vue';
 import BrandMark from './BrandMark.vue';
 import { network } from '../network.js';
 
-// Today and History use the full width on desktop. Other screens sit in a
-// centred column beside the sidebar.
-defineProps({ wide: { type: Boolean, default: false } });
+defineProps({
+    // Today and History use the full width on desktop. Other screens sit in
+    // a centred column beside the sidebar.
+    wide: { type: Boolean, default: false },
+    // Settings is reached from the gear, not a tab, so on phones it has no
+    // tab bar. The desktop sidebar always shows.
+    tabs: { type: Boolean, default: true },
+});
 
 /*
  * The frame around every signed-in screen. Phones get a tab bar at the
@@ -22,7 +27,7 @@ const tabs = [
 </script>
 
 <template>
-    <div class="layout">
+    <div class="layout" :class="{ 'layout--no-tabs': !tabs }">
         <nav class="nav" aria-label="Main">
             <RouterLink to="/" class="nav__brand"><BrandMark /></RouterLink>
             <ul>
@@ -114,6 +119,16 @@ const tabs = [
 .nav__link.is-active {
     color: var(--lagoon);
     font-weight: 700;
+}
+
+@media (max-width: 1023px) {
+    .layout--no-tabs .nav {
+        display: none;
+    }
+
+    .layout--no-tabs .content {
+        padding-bottom: calc(24px + env(safe-area-inset-bottom));
+    }
 }
 
 /* Desktop: the tab bar becomes a sidebar. */
