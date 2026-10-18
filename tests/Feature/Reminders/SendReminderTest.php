@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Mail;
 beforeEach(function () {
     Mail::fake();
     $this->travelTo('2026-10-19 10:00:00');
-    $this->user = User::factory()->create(['timezone' => 'Africa/Nairobi']);
+    $this->user = User::factory()->receivingReminders()->create(['timezone' => 'Africa/Nairobi']);
     $this->fast = Fast::factory()->for($this->user)->create([
         'started_at' => '2026-10-18 18:00:00',
         'target_end_at' => '2026-10-19 10:00:00',
@@ -105,6 +105,16 @@ it('cancels the reminder if the email address is not confirmed', function () {
     expect($reminder->fresh()->status)->toBe(ReminderStatus::Cancelled);
 });
 
+it('cancels the reminder if fasting reminder emails are turned off', function () {
+    $this->user->forceFill(['email_fasting_reminders' => false])->save();
+    $reminder = dueReminder($this->fast);
+
+    SendReminder::dispatchSync($reminder->id);
+
+    Mail::assertNothingSent();
+    expect($reminder->fresh()->status)->toBe(ReminderStatus::Cancelled);
+});
+
 it('cancels the reminder if its type is switched off', function (ReminderType $type) {
     $this->user->forceFill([$type->settingColumn() => false])->save();
     $reminder = dueReminder($this->fast, ['type' => $type]);
@@ -187,11 +197,10 @@ describe('the email', function () {
         $mail->assertSeeInText('Your next fast is planned for 8:30 pm');
     });
 
-    it('greets the user and links to their email preferences', function () {
+    it('greets the user and says why they are getting it', function () {
         $mail = new ReminderMail(dueReminder($this->fast));
 
         $mail->assertSeeInText("Hi {$this->user->first_name},");
-        $mail->assertSeeInHtml('Email preferences');
-        $mail->assertSeeInHtml('Unsubscribe');
+        $mail->assertSeeInText("You're getting this because you turned on fasting reminders.");
     });
 });

@@ -4,7 +4,7 @@ namespace App\Mail;
 
 use App\Enums\ReminderType;
 use App\Models\Reminder;
-use Illuminate\Mail\Mailable;
+use App\Models\User;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 
@@ -12,9 +12,19 @@ use Illuminate\Mail\Mailables\Envelope;
  * Sent by the SendReminder job, never queued on its own: the job decides
  * whether and when it goes. Times are shown in the user's time zone.
  */
-class ReminderMail extends Mailable
+class ReminderMail extends BeachReadyMail
 {
     public function __construct(public Reminder $reminder) {}
+
+    protected function recipient(): User
+    {
+        return $this->reminder->fast->user;
+    }
+
+    protected function reason(): string
+    {
+        return "You're getting this because you turned on fasting reminders.";
+    }
 
     public function envelope(): Envelope
     {
@@ -40,6 +50,7 @@ class ReminderMail extends Mailable
                     ReminderType::GoalReached => "You've fasted {$fast->fasting_hours} hours. End your fast whenever you're ready.",
                     ReminderType::EatingWindowClosing => "Your next fast is planned for {$localTime($this->reminder->send_at->addHour())}, so now is a good time for your last meal.",
                 },
+                ...$this->footer(),
             ],
         );
     }

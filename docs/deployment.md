@@ -10,7 +10,7 @@ Beach Ready runs on [Laravel Cloud](https://cloud.laravel.com). Every push to `m
 | Scheduler | App cluster, **Scheduler** toggle | Cloud runs `schedule:run` every minute. The only task is `reminders:dispatch-due`. |
 | Queue worker | App cluster, **background process** | One `queue:work` process on the `database` connection. It sends reminder emails. |
 | Database | **Laravel Serverless Postgres 17** | Holds everything, including sessions, cache, the job queue and failed jobs. |
-| Mail | Log driver until Stage 3, then MailerSend | No email can go out before Stage 3 anyway: nobody can confirm an address yet. |
+| Mail | MailerSend, through Laravel's built-in `smtp` mailer | No package: only `MAIL_*` variables. See [Email with MailerSend](#email-with-mailersend). |
 | CI | GitHub Actions, `.github/workflows/ci.yml` | Pint, plus the Unit, Feature and Concurrency suites against PostgreSQL 17. |
 
 The queue, sessions and cache all use the database, so the only resource to attach is Postgres. A Valkey cache or Cloud's managed queues can be added later if the load ever calls for them. Managed queues would also need the `aws/aws-sdk-php` package and would change `QUEUE_CONNECTION` to `cloud`.
@@ -93,9 +93,14 @@ Add these in the environment's settings. Anything not listed (database credentia
 | `SESSION_SECURE_COOKIE` | `true` | The session cookie is only sent over HTTPS. |
 | `CACHE_STORE` | `database` | Also used by the scheduler's `withoutOverlapping` and `onOneServer` locks. |
 | `QUEUE_CONNECTION` | `database` | The reminder jobs (decision 0004). |
-| `MAIL_MAILER` | `log` | Until Stage 3 adds MailerSend. |
-| `MAIL_FROM_ADDRESS` | an address on your domain | |
+| `MAIL_MAILER` | `smtp`, or `log` until MailerSend is set up | With `log`, emails go to the logs instead of being sent. |
+| `MAIL_HOST` | from MailerSend, e.g. `smtp.mailersend.net` | See [Email with MailerSend](#email-with-mailersend). |
+| `MAIL_PORT` | from MailerSend, e.g. `587` | Laravel switches to TLS (STARTTLS) on its own; leave `MAIL_SCHEME` unset. |
+| `MAIL_USERNAME` | the MailerSend SMTP user's username | |
+| `MAIL_PASSWORD` | the MailerSend SMTP user's password | A secret: only ever in Cloud's variables. |
+| `MAIL_FROM_ADDRESS` | an address on the domain verified in MailerSend | MailerSend refuses other domains. |
 | `MAIL_FROM_NAME` | `Beach Ready` | |
+| `MAIL_POSTAL_ADDRESS` | a postal address, e.g. `PO Box 123, Nairobi` | Shown in every email footer, as commercial email rules expect. |
 
 **`APP_KEY`:** check whether Cloud has already set one. If not, open the environment's **Commands** tab, run `php artisan key:generate --show`, and paste the output (it starts with `base64:`) as `APP_KEY`. Keep it stable: changing it logs everyone out.
 
@@ -113,6 +118,17 @@ Click **Deploy**. When it finishes, run these in the **Commands** tab:
 | `php artisan queue:failed` | No failed jobs. |
 
 Then open `https://<your-app>.laravel.cloud/up`, which should return 200.
+
+### Email with MailerSend
+
+Beach Ready sends mail through MailerSend's SMTP relay with Laravel's own `smtp` mailer, so there's no MailerSend package to install. Until this is done, keep `MAIL_MAILER=log`.
+
+1. **Add and verify your sending domain** in MailerSend. It gives you DNS records for SPF, DKIM and the return path; add them at your DNS provider and wait for MailerSend to show the domain as verified.
+2. **Create an SMTP user** in the domain's SMTP section. Copy the host, port, username and password straight away; the password may only be shown once.
+3. **Set the `MAIL_*` variables** above in Laravel Cloud, with `MAIL_FROM_ADDRESS` on the verified domain, and redeploy.
+4. **Check it** by turning on fasting reminders for your own account: the confirmation email should arrive, with working "Manage email preferences" and "Unsubscribe" links. In Gmail, "Show original" should show `List-Unsubscribe` and `List-Unsubscribe-Post` headers and SPF and DKIM `PASS`.
+
+Every email is queued and sent by the queue worker, so if nothing arrives, check `php artisan queue:failed` in the Commands tab first.
 
 ### Later: custom domain
 

@@ -115,4 +115,21 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Beach Ready
+    |--------------------------------------------------------------------------
+    |
+    | The Beach Ready theme for every email, and the postal address shown in
+    | each footer, which commercial email rules expect.
+    |
+    */
+
+    'markdown' => [
+        'theme' => 'beach-ready',
+        'paths' => [resource_path('views/vendor/mail')],
+    ],
+
+    'postal_address' => env('MAIL_POSTAL_ADDRESS'),
+
 ];

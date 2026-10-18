@@ -22,6 +22,19 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * The same defaults as the columns, so a user who was just created has
+     * them before being read back from the database.
+     */
+    protected $attributes = [
+        'remind_before_goal' => true,
+        'remind_goal_reached' => true,
+        'remind_eating_window_closing' => false,
+        'email_fasting_reminders' => false,
+        'email_weekly_summary' => false,
+        'email_product_news' => false,
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -34,6 +47,10 @@ class User extends Authenticatable
             'remind_before_goal' => 'boolean',
             'remind_goal_reached' => 'boolean',
             'remind_eating_window_closing' => 'boolean',
+            'email_fasting_reminders' => 'boolean',
+            'email_weekly_summary' => 'boolean',
+            'email_product_news' => 'boolean',
+            'confirmation_sent_at' => 'immutable_datetime',
         ];
     }
 
@@ -48,14 +65,24 @@ class User extends Authenticatable
     }
 
     /**
-     * Whether a reminder of this type may be emailed now. Checked at send
-     * time, so turning a type on or confirming mid-fast takes effect for
-     * reminders still to come. For now, confirmed means email_verified_at;
-     * stage 3 builds the confirmation and adds the "Fasting reminders" topic.
+     * Whether the address was confirmed through the link in the confirmation
+     * email. Nothing is emailed until it is.
+     */
+    public function hasConfirmedEmail(): bool
+    {
+        return $this->email_verified_at !== null;
+    }
+
+    /**
+     * Whether a reminder of this type may be emailed now: the address is
+     * confirmed, fasting reminder emails are on, and so is this type. Checked
+     * at send time, so a change mid-fast applies to reminders still to come.
      */
     public function wantsReminder(ReminderType $type): bool
     {
-        return $this->email_verified_at !== null && $this->{$type->settingColumn()};
+        return $this->hasConfirmedEmail()
+            && $this->email_fasting_reminders
+            && $this->{$type->settingColumn()};
     }
 
     /**
