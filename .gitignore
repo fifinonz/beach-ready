@@ -1,0 +1,67 @@
+# ── Secrets and environment ──────────────────────────
+# Never commit real environment files. Commit .env.example instead.
+.env
+.env.*
+!.env.example
+auth.json
+/storage/*.key
+
+# ── Laravel ──────────────────────────────────────────
+/vendor
+/storage/pail
+/public/storage
+/public/hot
+/public/build
+/bootstrap/cache/*.php
+.phpunit.result.cache
+/.phpunit.cache
+.phpactor.json
+Homestead.json
+Homestead.yaml
+
+# ── Node and Vite ────────────────────────────────────
+/node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+/dist
+
+# ── Lando (keep .lando.yml, ignore personal overrides) ─
+.lando.local.yml
+
+# ── Editors and tools ────────────────────────────────
+/.vscode
+/.idea
+/.fleet
+/.nova
+/.zed
+*.swp
+*.swo
+
+# ── Claude Code (keep shared settings, ignore personal ones) ─
+.claude/settings.local.json
+
+# ── Operating systems ────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Logs and temp files ──────────────────────────────
+*.log
+/coverage
+*.tmp
+
+# ── Future mobile builds (Play Store) ────────────────
+# Signing keys and service files must never be public.
+*.jks
+*.keystore
+*.p12
+*.pem
+key.properties
+google-services.json
+GoogleService-Info.plist
+/android/app/release
+/android/.gradle
+/android/local.properties
+/ios/Pods
