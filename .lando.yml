@@ -1,0 +1,51 @@
+name: beach-ready
+recipe: laravel
+config:
+  php: '8.4'
+  via: nginx
+  webroot: public
+  database: postgres:16
+  cache: none
+
+services:
+  # Runs Vite's dev server. Port 5173 is published so the browser can load
+  # assets and hot-reload straight from the container.
+  node:
+    type: node:22
+    ports:
+      - 5173:5173
+    build:
+      - npm install
+
+  # Catches every email the app sends. View them at the mailpit URL that
+  # `lando info` prints.
+  mailpit:
+    type: mailpit
+    mailFrom:
+      - appserver
+
+proxy:
+  mailpit:
+    - mail.beach-ready.lndo.site
+
+tooling:
+  npm:
+    service: node
+  node:
+    service: node
+  test:
+    service: appserver
+    description: Run the Pest test suite
+    cmd: php artisan test
+  pint:
+    service: appserver
+    description: Run Laravel Pint
+    cmd: vendor/bin/pint
+  queue:
+    service: appserver
+    description: Run the queue worker
+    cmd: php artisan queue:work
+  schedule:
+    service: appserver
+    description: Run the task scheduler
+    cmd: php artisan schedule:work
