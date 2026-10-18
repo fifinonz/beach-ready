@@ -21,6 +21,7 @@ class UserResource extends JsonResource
             'first_name' => $this->first_name,
             'email' => $this->email,
             'timezone' => $this->timezone,
+            'email_confirmed' => $this->hasConfirmedEmail(),
         ];
     }
 }

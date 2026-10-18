@@ -17,6 +17,8 @@ class RegisterRequest extends FormRequest
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:10'],
             'timezone' => ['required', 'string', 'timezone:all'],
+            // The optional "Email me fasting reminders" checkbox.
+            'email_reminders' => ['sometimes', 'boolean'],
         ];
     }
 

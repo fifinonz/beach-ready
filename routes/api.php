@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Fasts\ActiveFastController;
 use App\Http\Controllers\Fasts\FastController;
 use App\Http\Controllers\Fasts\WeeklyStatsController;
+use App\Http\Controllers\Settings\EmailSettingsController;
 use App\Http\Controllers\Settings\ReminderSettingsController;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
@@ -26,4 +27,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/settings/reminders', [ReminderSettingsController::class, 'show']);
     Route::patch('/settings/reminders', [ReminderSettingsController::class, 'update']);
+
+    Route::get('/settings/email', [EmailSettingsController::class, 'show']);
+    Route::patch('/settings/email', [EmailSettingsController::class, 'update']);
+    Route::post('/settings/email/confirmation', [EmailSettingsController::class, 'resendConfirmation']);
 });

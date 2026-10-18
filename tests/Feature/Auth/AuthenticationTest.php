@@ -50,6 +50,7 @@ it('returns the current user', function () {
             'first_name' => $user->first_name,
             'email' => $user->email,
             'timezone' => $user->timezone,
+            'email_confirmed' => false,
         ]]);
 });
 
