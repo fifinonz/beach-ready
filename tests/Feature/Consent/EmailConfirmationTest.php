@@ -148,69 +148,101 @@ describe('asking for another confirmation email', function () {
 });
 
 describe('the confirmation link', function () {
-    it('confirms the address', function () {
+    it('opens a page with a button, and confirms nothing by itself', function () {
         $this->get(EmailConfirmation::url($this->user))
+            ->assertOk()
+            ->assertSee('Yes, send me reminders')
+            ->assertSee('method="post"', false);
+
+        expect($this->user->fresh()->hasConfirmedEmail())->toBeFalse();
+    });
+
+    it('stays unconfirmed however often the link is opened, as a mail scanner would', function () {
+        $url = EmailConfirmation::url($this->user);
+
+        $this->get($url);
+        $this->get($url);
+        $this->get($url);
+
+        expect($this->user->fresh()->hasConfirmedEmail())->toBeFalse();
+    });
+
+    it('posts the button back to the same signed link', function () {
+        $url = EmailConfirmation::url($this->user);
+
+        $this->get($url)->assertSee('action="'.e($url).'"', false);
+    });
+
+    it('confirms the address when the button is pressed', function () {
+        $this->post(EmailConfirmation::url($this->user))
             ->assertOk()
             ->assertSee('Email confirmed. Reminders are on.');
 
         expect($this->user->fresh()->hasConfirmedEmail())->toBeTrue();
     });
 
-    it('can be clicked again without harm', function () {
+    it('can be confirmed again without harm', function () {
         $url = EmailConfirmation::url($this->user);
-        $this->get($url)->assertOk();
+        $this->post($url)->assertOk();
         $confirmedAt = $this->user->fresh()->email_verified_at;
         $this->travel(1)->hours();
 
-        $this->get($url)->assertOk();
+        $this->post($url)->assertOk();
 
         expect($this->user->fresh()->email_verified_at)->toEqual($confirmedAt);
     });
 
-    it('works for 48 hours', function () {
+    it('says it is already confirmed when opened again later', function () {
+        $url = EmailConfirmation::url($this->user);
+        $this->post($url);
+
+        $this->get($url)->assertOk()->assertSee('Email confirmed. Reminders are on.');
+    });
+
+    it('works for 48 hours', function (string $method) {
         $url = EmailConfirmation::url($this->user);
         $this->travel(48)->hours();
 
-        $this->get($url)->assertOk();
-    });
+        $this->call($method, $url)->assertOk();
+    })->with(['GET', 'POST']);
 
-    it('stops working after 48 hours', function () {
+    it('stops working after 48 hours', function (string $method) {
         $url = EmailConfirmation::url($this->user);
         $this->travelTo('2026-10-21 10:00:01'); // 48 hours and 1 second later.
 
-        $this->get($url)
+        $this->call($method, $url)
             ->assertForbidden()
             ->assertSee('This link no longer works');
 
         expect($this->user->fresh()->hasConfirmedEmail())->toBeFalse();
-    });
+    })->with(['GET', 'POST']);
 
-    it('refuses a link whose signature was changed', function () {
+    it('refuses a link whose signature was changed', function (string $method) {
         $url = EmailConfirmation::url($this->user).'0';
 
-        $this->get($url)->assertForbidden()->assertSee('This link no longer works');
+        $this->call($method, $url)->assertForbidden()->assertSee('This link no longer works');
 
         expect($this->user->fresh()->hasConfirmedEmail())->toBeFalse();
-    });
+    })->with(['GET', 'POST']);
 
-    it('refuses a link changed to confirm someone else', function () {
+    it('refuses a link changed to confirm someone else', function (string $method) {
         $someoneElse = User::factory()->create();
         $url = str_replace("/email/confirm/{$this->user->id}/", "/email/confirm/{$someoneElse->id}/", EmailConfirmation::url($this->user));
 
-        $this->get($url)->assertForbidden();
+        $this->call($method, $url)->assertForbidden();
 
         expect($someoneElse->fresh()->hasConfirmedEmail())->toBeFalse()
             ->and($this->user->fresh()->hasConfirmedEmail())->toBeFalse();
-    });
+    })->with(['GET', 'POST']);
 
-    it('refuses a link sent to the address before it was changed', function () {
+    it('refuses a link sent to the address before it was changed', function (string $method) {
         $url = EmailConfirmation::url($this->user);
         $this->user->update(['email' => 'new-address@example.com']);
 
-        $this->get($url)->assertForbidden()->assertSee('This link no longer works');
+        $this->call($method, $url)->assertForbidden()->assertSee('This link no longer works');
 
         expect($this->user->fresh()->hasConfirmedEmail())->toBeFalse();
-    });
+    })->with(['GET', 'POST']);
 });
 
 describe('the email', function () {

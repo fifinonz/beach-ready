@@ -12,7 +12,8 @@ Route::get('/', function () {
 // Links in emails. They work without logging in, because the signature
 // proves the link came from us; see decision 0006.
 Route::middleware('signed')->prefix('email')->group(function () {
-    Route::get('/confirm/{user}/{hash}', ConfirmEmailController::class)->name('email.confirm');
+    Route::get('/confirm/{user}/{hash}', [ConfirmEmailController::class, 'show'])->name('email.confirm');
+    Route::post('/confirm/{user}/{hash}', [ConfirmEmailController::class, 'store']);
 
     Route::get('/preferences/{user}', [PreferenceCenterController::class, 'show'])->name('email.preferences');
     Route::post('/preferences/{user}', [PreferenceCenterController::class, 'update']);
