@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+// Reminders are rows with a due time; this queues the ones that are due.
+// See decision 0004.
+Schedule::command('reminders:dispatch-due')
+    ->everyMinute()
+    ->withoutOverlapping();
