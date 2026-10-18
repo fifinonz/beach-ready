@@ -197,11 +197,10 @@ describe('the email', function () {
         $mail->assertSeeInText('Your next fast is planned for 8:30 pm');
     });
 
-    it('greets the user and links to their email preferences', function () {
+    it('greets the user and says why they are getting it', function () {
         $mail = new ReminderMail(dueReminder($this->fast));
 
         $mail->assertSeeInText("Hi {$this->user->first_name},");
-        $mail->assertSeeInHtml('Email preferences');
-        $mail->assertSeeInHtml('Unsubscribe');
+        $mail->assertSeeInText("You're getting this because you turned on fasting reminders.");
     });
 });

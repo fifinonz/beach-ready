@@ -16,6 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // The Vue SPA authenticates with Sanctum's session cookies, not tokens.
         $middleware->statefulApi();
+
+        // Mail clients send one-click unsubscribes (RFC 8058) with no CSRF
+        // token. The signed link is the proof instead.
+        $middleware->validateCsrfTokens(except: ['email/unsubscribe/*']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
