@@ -29,6 +29,8 @@ class DataExport
                 'first_name' => $user->first_name,
                 'email' => $user->email,
                 'timezone' => $user->timezone,
+                'fasting_hours' => $user->fasting_hours,
+                'why' => $user->why,
                 'created_at' => $user->created_at->toIso8601ZuluString(),
             ],
             'email_settings' => [

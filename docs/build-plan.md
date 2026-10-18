@@ -110,12 +110,16 @@ Read `CLAUDE.md` before every stage.
 > | Profile | `06-profile.png` |
 > | Reminders | `07-reminders.png` |
 > | Settings, reached from the gear icon | `09-settings.png` |
+> | Today on desktop | `10-desktop-today.png` |
+> | History on desktop | `11-desktop-history.png` |
 >
 > The tab bar is Today, History, Reminders and Profile. Settings is not a tab. The confirmation email (`08-confirmation-email.png`) is the design for the stage 3 email template.
 >
 > - The timer calculates elapsed time from the start time on every tick, so a sleeping phone or background tab never drifts.
 > - Accessible as built: real buttons and links, labelled inputs, switches with `role="switch"`, visible focus states.
-> - Make it an installable PWA with a manifest and service worker. Ask me before installing a package for it.
+> - Mobile-first and responsive. Below 768px, match the phone designs. At 1024px and above, the tab bar becomes a left sidebar with Settings at the bottom; Today and History use the desktop designs (`docs/design/10-desktop-today.png` and `11-desktop-history.png`); other screens sit in a centred column next to the sidebar. Test at 390px, 768px and 1280px.
+> - On desktop Today, a fast in progress shows as a dashed bar in the weekly chart and doesn't count as finished in the stats.
+> - Installable PWA: manifest, icons, and a service worker that caches the app shell. On iOS, show a one-time "Add to Home Screen" hint. When offline, the timer keeps running and actions that need the network show a clear message. Ask me before installing a package for it.
 > - Use the brand colours and Fira Sans from CLAUDE.md.
 > - Decide whether to keep or remove the skeleton's Tailwind, concurrently and @laravel/multiplex.
 > - On sign-up, render the `favourite_colour` honeypot field hidden from sight, screen readers and the tab order, with `autocomplete="off"` (decision 0007).

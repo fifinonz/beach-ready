@@ -3,11 +3,8 @@
 use App\Http\Controllers\Email\ConfirmEmailController;
 use App\Http\Controllers\Email\PreferenceCenterController;
 use App\Http\Controllers\Email\UnsubscribeController;
+use App\Http\Controllers\ServiceWorkerController;
 use Illuminate\Support\Facades\Route;
-
-Route::get('/', function () {
-    return view('welcome');
-});
 
 // Links in emails. They work without logging in, because the signature
 // proves the link came from us; see decision 0006.
@@ -31,3 +28,12 @@ Route::prefix('email')->group(function () {
         Route::post('/preferences/{user}', [PreferenceCenterController::class, 'update']);
     });
 });
+
+// The PWA's service worker, built per deploy (decision 0008). It must be
+// served from the root so it can look after the whole app.
+Route::get('/service-worker.js', ServiceWorkerController::class);
+
+// Every other path is a screen in the Vue app, which does its own routing.
+// API, email-link, Sanctum and health-check paths are left to their routes.
+Route::view('/{path?}', 'app')
+    ->where('path', '^(?!api/|email/|sanctum/|up$|build/).*$');

@@ -191,3 +191,43 @@ describe('end the fast', function () {
         expect($theirs->fresh()->isActive())->toBeTrue();
     });
 });
+
+describe('change the protocol', function () {
+    it('moves the goal to the new number of hours after the start', function () {
+        Fast::factory()->for($this->user)->create([
+            'started_at' => '2026-10-18 10:00:00',
+            'target_end_at' => '2026-10-19 02:00:00',
+        ]);
+
+        $this->patchJson('/api/fasts/active', ['fasting_hours' => 18])
+            ->assertOk()
+            ->assertJsonPath('data.protocol', '18:6')
+            ->assertJsonPath('data.started_at', '2026-10-18T10:00:00Z')
+            ->assertJsonPath('data.target_end_at', '2026-10-19T04:00:00Z');
+    });
+
+    it('can change the start time and the protocol together', function () {
+        Fast::factory()->for($this->user)->create();
+
+        $this->patchJson('/api/fasts/active', ['fasting_hours' => 14, 'started_at' => '2026-10-18T19:00'])
+            ->assertOk()
+            ->assertJsonPath('data.started_at', '2026-10-18T16:00:00Z')
+            ->assertJsonPath('data.target_end_at', '2026-10-19T06:00:00Z');
+    });
+
+    it('refuses hours outside 12 to 20', function (int $hours) {
+        Fast::factory()->for($this->user)->create();
+
+        $this->patchJson('/api/fasts/active', ['fasting_hours' => $hours])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('fasting_hours');
+    })->with([11, 21]);
+
+    it('requires a start time or a protocol', function () {
+        Fast::factory()->for($this->user)->create();
+
+        $this->patchJson('/api/fasts/active', [])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['started_at', 'fasting_hours']);
+    });
+});

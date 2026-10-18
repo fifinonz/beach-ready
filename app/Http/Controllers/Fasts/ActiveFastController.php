@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Fasts;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Fasts\EndFastRequest;
-use App\Http\Requests\Fasts\UpdateStartTimeRequest;
+use App\Http\Requests\Fasts\UpdateActiveFastRequest;
 use App\Http\Resources\FastResource;
 use App\Models\Fast;
 use App\Reminders\ReminderScheduler;
@@ -26,12 +26,16 @@ class ActiveFastController extends Controller
         return response()->json(['data' => $fast ? FastResource::make($fast) : null]);
     }
 
-    public function update(UpdateStartTimeRequest $request, ReminderScheduler $reminders): FastResource
+    public function update(UpdateActiveFastRequest $request, ReminderScheduler $reminders): FastResource
     {
         $fast = $this->activeFastOrFail($request);
 
         DB::transaction(function () use ($fast, $request, $reminders) {
-            $fast->startAt($request->startedAt());
+            if ($request->filled('fasting_hours')) {
+                $fast->changeProtocol($request->integer('fasting_hours'));
+            }
+
+            $fast->startAt($request->filled('started_at') ? $request->startedAt() : $fast->started_at);
             $fast->save();
             $reminders->startTimeChanged($fast, CarbonImmutable::now());
         });

@@ -58,7 +58,7 @@ Screen designs are in `docs/design/`, one PNG per screen, numbered in flow order
 Fill this in during stage 0, once the commands are confirmed to work, so later sessions can rely on it:
 
 - Start the environment: `lando start` (URLs: `lando info`)
-- Run tests: `lando test`
+- Run tests: `lando test` (PHP, Pest) and `lando npm test` (front end, Vitest)
 - Run code style: `lando pint` (check only: `lando pint --test`)
 - Run the queue worker: `lando queue`
 - Run the scheduler: `lando schedule`

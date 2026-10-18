@@ -1,20 +1,23 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
-import tailwindcss from '@tailwindcss/vite';
+import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.js'],
             refresh: true,
+            // Downloaded at build time and served from our own domain, so the
+            // font also works offline in the installed app.
             fonts: [
-                bunny('Instrument Sans', {
-                    weights: [400, 500, 600],
+                bunny('Fira Sans', {
+                    weights: [400, 600, 700],
+                    variable: '--font-brand',
                 }),
             ],
         }),
-        tailwindcss(),
+        vue(),
     ],
     server: {
         // Listen inside the Lando node container, but tell the browser to

@@ -99,6 +99,15 @@ describe('editing the start time', function () {
         expect(remindersOf($this->user)['before_goal'])->toBe(['2026-10-19T08:30:00Z', 'pending']);
     });
 
+    it('moves pending reminders when the protocol changes', function () {
+        $this->patchJson('/api/fasts/active', ['fasting_hours' => 18])->assertOk();
+
+        expect(remindersOf($this->user))->toBe([
+            'before_goal' => ['2026-10-19T11:30:00Z', 'pending'],
+            'goal_reached' => ['2026-10-19T12:00:00Z', 'pending'],
+        ]);
+    });
+
     it('never reschedules a reminder that was already sent', function () {
         $sent = $this->user->activeFast->reminders()->where('type', ReminderType::BeforeGoal)->first();
         $sent->update(['status' => ReminderStatus::Sent, 'sent_at' => now()]);
