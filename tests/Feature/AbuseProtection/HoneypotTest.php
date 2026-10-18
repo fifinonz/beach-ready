@@ -2,6 +2,7 @@
 
 use App\Mail\ConfirmEmailMail;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Testing\TestResponse;
 
@@ -19,14 +20,14 @@ function signUpWith(array $extra): TestResponse
 }
 
 it('looks like a normal sign-up to a bot that fills in the hidden field', function () {
-    signUpWith(['website' => 'https://spam.example'])
+    signUpWith(['favourite_colour' => 'blue'])
         ->assertCreated()
         ->assertJsonPath('data.email', 'muthoni@example.com')
         ->assertJsonPath('data.email_confirmed', false);
 });
 
 it('creates no account, logs nobody in and sends no email', function () {
-    signUpWith(['website' => 'https://spam.example']);
+    signUpWith(['favourite_colour' => 'blue']);
 
     expect(User::count())->toBe(0);
     $this->assertGuest();
@@ -34,7 +35,7 @@ it('creates no account, logs nobody in and sends no email', function () {
 });
 
 it('rejects a bot even when the rest of the form is invalid, so errors give nothing away', function () {
-    $this->postJson('/api/register', ['website' => 'x', 'password' => 'short'])
+    $this->postJson('/api/register', ['favourite_colour' => 'x', 'password' => 'short'])
         ->assertCreated();
 
     expect(User::count())->toBe(0);
@@ -48,5 +49,13 @@ it('lets people through when the hidden field is left empty', function (array $e
     Mail::assertQueued(ConfirmEmailMail::class);
 })->with([
     'not sent' => [[]],
-    'empty' => [['website' => '']],
+    'empty' => [['favourite_colour' => '']],
 ]);
+
+it('logs each rejection, so a real person caught by mistake can be spotted', function () {
+    Log::spy();
+
+    signUpWith(['favourite_colour' => 'blue']);
+
+    Log::shouldHaveReceived('info')->once()->with('Sign-up rejected by the honeypot.', Mockery::type('array'));
+});
