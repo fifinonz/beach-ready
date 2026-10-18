@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { loadSession, session } from './session.js';
+import SignUp from './screens/SignUp.vue';
+import LogIn from './screens/LogIn.vue';
 import NotBuiltYet from './screens/NotBuiltYet.vue';
 
 /*
@@ -7,8 +9,8 @@ import NotBuiltYet from './screens/NotBuiltYet.vue';
  * still to come in Stage 5 use NotBuiltYet until they're built.
  */
 const routes = [
-    { path: '/signup', component: NotBuiltYet, meta: { guest: true, title: 'Sign up' } },
-    { path: '/login', component: NotBuiltYet, meta: { guest: true, title: 'Log in' } },
+    { path: '/signup', component: SignUp, meta: { guest: true, title: 'Sign up' } },
+    { path: '/login', component: LogIn, meta: { guest: true, title: 'Log in' } },
     { path: '/protocol', component: NotBuiltYet, meta: { auth: true, title: 'Choose a protocol' } },
     { path: '/', component: NotBuiltYet, meta: { auth: true, title: 'Today' } },
     { path: '/:path(.*)*', redirect: '/' },
