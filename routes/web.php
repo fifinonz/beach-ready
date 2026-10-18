@@ -5,10 +5,6 @@ use App\Http\Controllers\Email\PreferenceCenterController;
 use App\Http\Controllers\Email\UnsubscribeController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
 // Links in emails. They work without logging in, because the signature
 // proves the link came from us; see decision 0006.
 Route::prefix('email')->group(function () {
@@ -31,3 +27,8 @@ Route::prefix('email')->group(function () {
         Route::post('/preferences/{user}', [PreferenceCenterController::class, 'update']);
     });
 });
+
+// Every other path is a screen in the Vue app, which does its own routing.
+// API, email-link, Sanctum and health-check paths are left to their routes.
+Route::view('/{path?}', 'app')
+    ->where('path', '^(?!api/|email/|sanctum/|up$|build/).*$');

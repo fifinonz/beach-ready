@@ -77,3 +77,23 @@ jobs:
 
       # Runs every suite in phpunit.xml: Unit, Feature and Concurrency.
       - run: php artisan test
+
+  frontend:
+    name: Front end
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      # Vitest: the client-side logic and components.
+      - run: npm test
+
+      # The same production build Laravel Cloud runs.
+      - run: npm run build
