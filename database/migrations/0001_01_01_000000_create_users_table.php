@@ -13,8 +13,11 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('first_name');
             $table->string('email')->unique();
+            // IANA time zone, e.g. Africa/Nairobi. Times are stored in UTC and
+            // converted with this only when displaying or reading user input.
+            $table->string('timezone');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
