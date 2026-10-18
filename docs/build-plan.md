@@ -76,6 +76,7 @@ Read `CLAUDE.md` before every stage.
 > - Download my data (JSON of the user's profile, fasts, reminders and email settings) and delete my account (removes everything, including pending reminders).
 > - Tests for each, including an expired link and a tampered link.
 > - The user factory marks emails as verified by default. Decide the right default, since confirmation controls whether reminders send.
+> - Add an endpoint to read and change the per-type reminder settings.
 >
 > Stop and summarise.
 
