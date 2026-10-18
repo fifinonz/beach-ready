@@ -91,6 +91,7 @@ describe('the person\'s time zone', () => {
 
         expect(dayAndTime('2026-10-18T17:30:00Z', 'Africa/Nairobi', now)).toBe('Today, 8:30 pm');
         expect(dayAndTime('2026-10-19T09:30:00Z', 'Africa/Nairobi', now)).toBe('Tomorrow, 12:30 pm');
+        expect(dayAndTime('2026-10-17T17:30:00Z', 'Africa/Nairobi', now)).toBe('Yesterday, 8:30 pm');
     });
 
     it('fills a date and time input in local time', () => {

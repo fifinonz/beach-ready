@@ -89,8 +89,8 @@ const tabs = [
     list-style: none;
 }
 
-.nav__brand,
-.nav__settings {
+.nav .nav__brand,
+.nav .nav__settings {
     display: none;
 }
 
@@ -131,7 +131,7 @@ const tabs = [
         background: var(--foam);
     }
 
-    .nav__brand {
+    .nav .nav__brand {
         display: block;
         margin: 0 0 32px 12px;
         color: var(--deep);
@@ -159,7 +159,7 @@ const tabs = [
         color: var(--deep);
     }
 
-    .nav__settings {
+    .nav .nav__settings {
         display: flex;
         margin-top: auto;
     }

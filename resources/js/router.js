@@ -4,6 +4,7 @@ import SignUp from './screens/SignUp.vue';
 import LogIn from './screens/LogIn.vue';
 import NotBuiltYet from './screens/NotBuiltYet.vue';
 import ChooseProtocol from './screens/ChooseProtocol.vue';
+import TodayScreen from './screens/TodayScreen.vue';
 
 /*
  * Screens for visitors (`guest`) and for signed-in people (`auth`). Screens
@@ -13,7 +14,11 @@ const routes = [
     { path: '/signup', component: SignUp, meta: { guest: true, title: 'Sign up' } },
     { path: '/login', component: LogIn, meta: { guest: true, title: 'Log in' } },
     { path: '/protocol', component: ChooseProtocol, meta: { auth: true, title: 'Choose a protocol' } },
-    { path: '/', component: NotBuiltYet, meta: { auth: true, title: 'Today' } },
+    { path: '/', component: TodayScreen, meta: { auth: true, title: 'Today' } },
+    { path: '/history', component: NotBuiltYet, meta: { auth: true, title: 'History' } },
+    { path: '/reminders', component: NotBuiltYet, meta: { auth: true, title: 'Reminders' } },
+    { path: '/profile', component: NotBuiltYet, meta: { auth: true, title: 'Profile' } },
+    { path: '/settings', component: NotBuiltYet, meta: { auth: true, title: 'Settings' } },
     { path: '/:path(.*)*', redirect: '/' },
 ];
 

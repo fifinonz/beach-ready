@@ -43,7 +43,9 @@ onMounted(async () => {
     returnFocusTo = document.activeElement;
     document.addEventListener('keydown', onKeydown);
     await nextTick();
-    panel.value?.querySelector('[autofocus], input, button')?.focus();
+    // The dialog itself takes focus, so nothing looks pre-chosen, unless a
+    // field asks for it with `autofocus`.
+    (panel.value?.querySelector('[autofocus]') ?? panel.value)?.focus();
 });
 
 onBeforeUnmount(() => {
@@ -57,7 +59,7 @@ onBeforeUnmount(() => {
         <div class="backdrop__above">
             <slot name="above" />
         </div>
-        <div ref="panel" class="sheet" role="dialog" aria-modal="true" :aria-labelledby="`${id}-title`">
+        <div ref="panel" class="sheet" role="dialog" aria-modal="true" tabindex="-1" :aria-labelledby="`${id}-title`">
             <span class="sheet__handle" aria-hidden="true" />
             <h2 :id="`${id}-title`" class="sheet__title">{{ title }}</h2>
             <slot />
@@ -96,6 +98,10 @@ onBeforeUnmount(() => {
     border-radius: 24px 24px 0 0;
     background: var(--foam);
     animation: rise 0.2s ease-out;
+}
+
+.sheet:focus {
+    outline: none;
 }
 
 .sheet__handle {

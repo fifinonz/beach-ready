@@ -101,9 +101,17 @@ export function dayName(date, today) {
         .format(new Date(`${date}T00:00:00Z`));
 }
 
-/** "Today, 8:30 pm" or "Tomorrow, 12:30 pm". */
+/**
+ * "Today, 8:30 pm", "Tomorrow, 12:30 pm" or "Yesterday, 8:30 pm", for a
+ * fast's start and goal. (Lists of days use weekday names instead, as the
+ * history designs do.)
+ */
 export function dayAndTime(instant, timeZone, now) {
-    return `${dayName(localDate(instant, timeZone), localDate(now, timeZone))}, ${localTime(instant, timeZone)}`;
+    const date = localDate(instant, timeZone);
+    const today = localDate(now, timeZone);
+    const name = date === addDays(today, -1) ? 'Yesterday' : dayName(date, today);
+
+    return `${name}, ${localTime(instant, timeZone)}`;
 }
 
 /** The value for an <input type="datetime-local">, in the person's time zone. */
