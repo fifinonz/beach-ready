@@ -19,7 +19,8 @@ Beach Ready is a Laravel and Vue 3 web app that runs as an installable PWA. Star
 - [ ] Preference center: per-topic email settings and one-click unsubscribe
   (the weekly summary and product news topics are stored, but nothing sends them yet)
 - [ ] Download my data and delete my account
-- [ ] Rate limiting and a honeypot on public forms
+- [x] Rate limiting on public endpoints
+- [ ] Honeypot on sign-up
 - [ ] Installable on a phone as a PWA
 
 ## Tech stack
