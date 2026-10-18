@@ -7,9 +7,11 @@ use App\Http\Requests\Fasts\EndFastRequest;
 use App\Http\Requests\Fasts\UpdateStartTimeRequest;
 use App\Http\Resources\FastResource;
 use App\Models\Fast;
+use App\Reminders\ReminderScheduler;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ActiveFastController extends Controller
 {
@@ -24,22 +26,29 @@ class ActiveFastController extends Controller
         return response()->json(['data' => $fast ? FastResource::make($fast) : null]);
     }
 
-    public function update(UpdateStartTimeRequest $request): FastResource
+    public function update(UpdateStartTimeRequest $request, ReminderScheduler $reminders): FastResource
     {
         $fast = $this->activeFastOrFail($request);
 
-        $fast->startAt($request->startedAt());
-        $fast->save();
+        DB::transaction(function () use ($fast, $request, $reminders) {
+            $fast->startAt($request->startedAt());
+            $fast->save();
+            $reminders->startTimeChanged($fast, CarbonImmutable::now());
+        });
 
         return FastResource::make($fast);
     }
 
-    public function end(EndFastRequest $request): FastResource
+    public function end(EndFastRequest $request, ReminderScheduler $reminders): FastResource
     {
         $fast = $this->activeFastOrFail($request);
+        $now = CarbonImmutable::now();
 
-        $fast->end(CarbonImmutable::now(), $request->feeling());
-        $fast->save();
+        DB::transaction(function () use ($fast, $request, $reminders, $now) {
+            $fast->end($now, $request->feeling());
+            $fast->save();
+            $reminders->fastEnded($fast, $now);
+        });
 
         return FastResource::make($fast);
     }
