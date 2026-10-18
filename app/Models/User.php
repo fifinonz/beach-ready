@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\ReminderType;
 use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -30,6 +31,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'remind_before_goal' => 'boolean',
+            'remind_goal_reached' => 'boolean',
+            'remind_eating_window_closing' => 'boolean',
         ];
     }
 
@@ -41,6 +45,17 @@ class User extends Authenticatable
     public function activeFast(): HasOne
     {
         return $this->hasOne(Fast::class)->whereNull('ended_at');
+    }
+
+    /**
+     * Whether a reminder of this type may be emailed now. Checked at send
+     * time, so turning a type on or confirming mid-fast takes effect for
+     * reminders still to come. For now, confirmed means email_verified_at;
+     * stage 3 builds the confirmation and adds the "Fasting reminders" topic.
+     */
+    public function wantsReminder(ReminderType $type): bool
+    {
+        return $this->email_verified_at !== null && $this->{$type->settingColumn()};
     }
 
     /**
