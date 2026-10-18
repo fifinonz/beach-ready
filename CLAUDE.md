@@ -64,4 +64,4 @@ Fill this in during stage 0, once the commands are confirmed to work, so later s
 - Production front-end build: `lando npm run build`
 - Artisan and Composer: `lando artisan ...`, `lando composer ...`
 
-Tests run against in-memory SQLite (set in `phpunit.xml`); the app itself uses PostgreSQL.
+Tests run against the `beach_ready_testing` PostgreSQL database (set in `phpunit.xml`), so they need Lando running. See `docs/decisions/0001-test-against-postgresql.md`.

@@ -8,6 +8,12 @@ config:
   cache: none
 
 services:
+  # The tests get their own database, so `lando test` never touches
+  # development data. Created on first start, and skipped if it exists.
+  database:
+    run:
+      - psql -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = 'beach_ready_testing'" | grep -q 1 || createdb -U postgres beach_ready_testing
+
   # Runs Vite's dev server. Port 5173 is published so the browser can load
   # assets and hot-reload straight from the container.
   node:
