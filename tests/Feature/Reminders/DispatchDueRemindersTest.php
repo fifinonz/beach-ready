@@ -40,11 +40,12 @@ it('leaves reminders that were sent or cancelled', function (ReminderStatus $sta
     Queue::assertNothingPushed();
 })->with([ReminderStatus::Sent, ReminderStatus::Cancelled]);
 
-it('runs every minute, one run at a time', function () {
+it('runs every minute, one run at a time, on one server', function () {
     $event = collect(app(Schedule::class)->events())
         ->first(fn ($event) => str_contains($event->command, 'reminders:dispatch-due'));
 
     expect($event)->not->toBeNull()
         ->and($event->expression)->toBe('* * * * *')
-        ->and($event->withoutOverlapping)->toBeTrue();
+        ->and($event->withoutOverlapping)->toBeTrue()
+        ->and($event->onOneServer)->toBeTrue();
 });

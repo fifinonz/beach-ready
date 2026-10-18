@@ -32,7 +32,8 @@ Beach Ready is a Laravel and Vue 3 web app that runs as an installable PWA. Star
 | Email | MailerSend |
 | Local environment | Lando |
 | Tests | Pest |
-| Deployment | GitHub Actions and Deployer to an Ubuntu VPS |
+| CI | GitHub Actions |
+| Deployment | Laravel Cloud |
 
 ## Engineering notes
 
