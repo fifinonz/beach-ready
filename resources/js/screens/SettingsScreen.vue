@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { api, ApiError, OfflineError } from '../api.js';
-import { signedOut } from '../session.js';
+import { session, signedOut } from '../session.js';
 import AppIcon from '../components/AppIcon.vue';
 import AppLayout from '../components/AppLayout.vue';
 import ModalSheet from '../components/ModalSheet.vue';
@@ -136,7 +136,10 @@ async function deleteAccount() {
                             <strong>Download my data</strong><span>JSON</span>
                         </a>
                     </li>
-                    <li>
+                    <li v-if="session.user?.is_demo" class="data__row">
+                        <strong>Delete my account</strong><span>Demo accounts delete themselves after 24 hours</span>
+                    </li>
+                    <li v-else>
                         <button type="button" class="data__row data__row--danger" @click="openDelete">
                             <strong>Delete my account</strong><span>Removes everything</span>
                         </button>
