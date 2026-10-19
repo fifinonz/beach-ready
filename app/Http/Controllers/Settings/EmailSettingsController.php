@@ -53,6 +53,7 @@ class EmailSettingsController extends Controller
         $user = $request->user();
 
         abort_if($user->hasConfirmedEmail(), 409, 'Your email address is already confirmed.');
+        abort_if($user->is_demo, 409, "Demo accounts don't receive email.");
 
         $wait = $this->confirmation->resend($user);
 

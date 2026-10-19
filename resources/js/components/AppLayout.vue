@@ -1,9 +1,10 @@
 <script setup>
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import AppIcon from './AppIcon.vue';
 import BrandMark from './BrandMark.vue';
 import { network } from '../network.js';
 import { dismissInstallHint, pwa } from '../pwa.js';
+import { logOut, session } from '../session.js';
 
 defineProps({
     // Today and History use the full width on desktop. Other screens sit in
@@ -19,6 +20,14 @@ defineProps({
  * bottom; from 1024px wide it becomes a sidebar on the left, with Settings
  * at the bottom. On phones, Settings is the gear in each screen's header.
  */
+const router = useRouter();
+
+// Leaving the demo for a real account: sign the demo out first.
+async function createOwnAccount() {
+    await logOut().catch(() => {});
+    await router.push('/signup');
+}
+
 const tabs = [
     { to: '/', label: 'Today', icon: 'today' },
     { to: '/history', label: 'History', icon: 'history' },
@@ -46,6 +55,10 @@ const tabs = [
         </nav>
 
         <div class="content" :class="{ 'content--narrow': !wide }">
+            <p v-if="session.user?.is_demo" class="demo-banner">
+                <span>You're trying the demo. Explore freely: this account is deleted after 24 hours and never gets email.</span>
+                <button type="button" class="demo-banner__leave" @click="createOwnAccount">Create your own account</button>
+            </p>
             <p v-if="!network.online" class="offline" role="status">
                 <AppIcon name="offline" />
                 You're offline. Your timer keeps running; saving changes needs a connection.
@@ -85,6 +98,35 @@ const tabs = [
 
 .offline .icon {
     flex: none;
+}
+
+.demo-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
+    margin: 12px var(--gutter) 0;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    background: var(--shallows);
+}
+
+.demo-banner__leave {
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--lagoon);
+    font: 600 1rem var(--font);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+@media (min-width: 1024px) {
+    .demo-banner {
+        margin: 24px 0 0;
+    }
 }
 
 .install-hint {

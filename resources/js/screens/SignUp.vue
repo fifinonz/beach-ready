@@ -4,6 +4,7 @@ import { RouterLink, useRouter } from 'vue-router';
 import { api, ApiError, OfflineError } from '../api.js';
 import { signedIn } from '../session.js';
 import BrandMark from '../components/BrandMark.vue';
+import TryDemoButton from '../components/TryDemoButton.vue';
 
 const router = useRouter();
 
@@ -127,6 +128,8 @@ const errorFor = (field) => errors.value[field]?.[0] ?? null;
         </form>
 
         <p class="log-in">Already have an account? <RouterLink to="/login">Log in</RouterLink></p>
+
+        <TryDemoButton />
 
         <p class="disclaimer">
             Beach Ready is a timer, not medical advice. If you're pregnant, diabetic or have a history of disordered eating, talk to a doctor before fasting.

@@ -34,6 +34,7 @@ class User extends Authenticatable
         'email_fasting_reminders' => false,
         'email_weekly_summary' => false,
         'email_product_news' => false,
+        'is_demo' => false,
     ];
 
     /**
@@ -54,6 +55,7 @@ class User extends Authenticatable
             'email_product_news' => 'boolean',
             'confirmation_sent_at' => 'immutable_datetime',
             'fasting_hours' => 'integer',
+            'is_demo' => 'boolean',
         ];
     }
 
@@ -74,6 +76,11 @@ class User extends Authenticatable
      */
     public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
     {
+        // Demo accounts never get email (decision 0011).
+        if ($this->is_demo) {
+            return;
+        }
+
         Mail::to($this)->queue(new ResetPasswordMail($this, $token));
     }
 

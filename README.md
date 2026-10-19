@@ -4,6 +4,8 @@ A calm, honest intermittent fasting timer, with reminders you have to ask for.
 
 Beach Ready is a Laravel and Vue 3 web app that runs as an installable PWA. Start a fast, watch the timer, and get a gentle reminder before your goal: but only after you've confirmed your email. It's built as a portfolio project to show how I approach the parts of a product that are easy to get wrong: background jobs, time zones, consent and abuse protection.
 
+**Live:** [beach-ready.bwsystems.co.ke](https://beach-ready.bwsystems.co.ke). Press "Try the demo" to look around without signing up: you get your own demo account with a few weeks of fasts, deleted after 24 hours.
+
 > **Status:** in active development. The checklist below shows what's built and what's next.
 
 ## Features
@@ -23,6 +25,9 @@ Beach Ready is a Laravel and Vue 3 web app that runs as an installable PWA. Star
 - [x] Honeypot on sign-up
 - [x] Installable on a phone as a PWA
 - [ ] Goals: see which fasts reached their goal (coming later)
+- [ ] Try the demo: a fresh demo account for each visitor, deleted after 24 hours
+- [ ] Uptime monitoring of the health check, with an alert when it fails
+- [ ] Alerts when a queued job fails all of its retries
 
 ## Tech stack
 
@@ -82,7 +87,7 @@ Day-to-day commands:
 
 The screens were designed before any code was written: sign-up, protocol picker, live timer, end-early flow, history, reminders, the confirmation email, profile and settings.
 
-[DESIGN LINK]
+The designs are in [`docs/design/`](docs/design/), one image per screen in flow order.
 
 ## How this was built
 

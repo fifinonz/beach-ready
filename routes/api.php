@@ -5,6 +5,7 @@ use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Demo\DemoController;
 use App\Http\Controllers\Fasts\ActiveFastController;
 use App\Http\Controllers\Fasts\AllTimeStatsController;
 use App\Http\Controllers\Fasts\FastController;
@@ -17,6 +18,8 @@ Route::post('/register', [RegisteredUserController::class, 'store'])
     ->middleware(['throttle:register', 'honeypot']);
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('throttle:login');
+Route::post('/demo', [DemoController::class, 'store'])
+    ->middleware('throttle:demo');
 Route::post('/forgot-password', [PasswordResetController::class, 'sendLink'])
     ->middleware('throttle:forgot-password');
 Route::post('/reset-password', [PasswordResetController::class, 'reset'])

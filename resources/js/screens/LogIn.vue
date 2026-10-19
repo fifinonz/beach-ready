@@ -4,6 +4,7 @@ import { RouterLink, useRouter } from 'vue-router';
 import { api, ApiError, OfflineError } from '../api.js';
 import { signedIn } from '../session.js';
 import AuthLayout from '../components/AuthLayout.vue';
+import TryDemoButton from '../components/TryDemoButton.vue';
 
 // There's no design for this screen; it follows the sign-up screen's style.
 const router = useRouter();
@@ -58,6 +59,8 @@ async function logIn() {
         </form>
 
         <p class="after">New to Beach Ready? <RouterLink to="/signup">Create an account</RouterLink></p>
+
+        <TryDemoButton />
     </AuthLayout>
 </template>
 

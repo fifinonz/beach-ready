@@ -134,9 +134,8 @@ CI and deployment moved to Stage 2.5. This stage gets the live app ready for vis
 
 > Read CLAUDE.md and `docs/deployment.md`. Prepare the live app for reviewers and keep an eye on it.
 >
-> - A demo account that reviewers can log in to, with a realistic few weeks of fasting history. It resets on a schedule so one visitor's changes don't greet the next, and it never sends real email.
-> - Uptime monitoring of the `/up` health check, with an alert when it fails.
-> - Alerts for failed jobs, so a reminder that fails all of its retries is noticed rather than sitting in `failed_jobs`.
+> - A "Try the demo" button that creates a fresh demo account for each visitor, already filled with a few weeks of fasts. Its address uses a reserved domain that can't receive mail and stays unconfirmed, so nothing is sent to it. A scheduled job deletes demo accounts after 24 hours, so no resets are needed and visitors can't interfere with each other. (This replaced a shared demo account that reset on a schedule; see decision 0011.)
+> - Uptime monitoring and failed-job alerts are moved to the README's features to develop.
 > - Document any new Laravel Cloud settings in `docs/deployment.md`. Ask me before adding a package or an external service.
 > - Update the README with the live demo link and tick everything that's done.
 >

@@ -54,6 +54,7 @@ it('returns the current user', function () {
             'fasting_hours' => null,
             'why' => null,
             'member_since' => $user->created_at->toIso8601ZuluString(),
+            'is_demo' => false,
         ]]);
 });
 

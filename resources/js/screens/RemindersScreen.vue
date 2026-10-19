@@ -74,7 +74,8 @@ async function toggleEmail() {
     }
 }
 
-const waiting = computed(() => email.value?.fasting_reminders && !email.value.email_confirmed);
+const isDemo = computed(() => session.user?.is_demo === true);
+const waiting = computed(() => !isDemo.value && email.value?.fasting_reminders && !email.value.email_confirmed);
 const secondsToResend = computed(() => Math.max(0, Math.ceil((resendAt.value - now.value) / 1000)));
 const resendStatus = ref(null);
 
@@ -96,11 +97,12 @@ async function resend() {
 }
 
 const emailStatus = computed(() => {
+    if (isDemo.value) return 'Not in the demo';
     if (!email.value?.fasting_reminders) return 'Off';
     return email.value.email_confirmed ? 'On' : 'Waiting for confirmation';
 });
 
-const timeZone = computed(() => session.user.timezone);
+const timeZone = computed(() => session.user?.timezone);
 const zoneName = computed(() =>
     new Intl.DateTimeFormat('en-KE', { timeZone: timeZone.value, timeZoneName: 'short' })
         .formatToParts(new Date())
@@ -113,7 +115,8 @@ const countdown = computed(() => `${Math.floor(secondsToResend.value / 60)}:${St
     <AppLayout>
         <PageHeader title="Reminders" />
 
-        <div class="reminders">
+        <!-- Nothing to show once there's no user, such as just after signing out. -->
+        <div v-if="session.user" class="reminders">
             <section v-if="waiting" class="confirm" aria-labelledby="confirm-title">
                 <h2 id="confirm-title"><AppIcon name="mail" /> Confirm your email to turn on email reminders</h2>
                 <p>We sent a link to {{ maskEmail(session.user.email) }}. Nothing is emailed until you click it.</p>
@@ -124,6 +127,8 @@ const countdown = computed(() => `${Math.floor(secondsToResend.value / 60)}:${St
                 </p>
                 <p class="confirm__status" aria-live="polite">{{ resendStatus }}</p>
             </section>
+
+            <p v-if="isDemo" class="demo-note">Demo accounts never get email, so you can try the switches but no reminders will arrive.</p>
 
             <p v-if="errorMessage" class="form-alert" role="alert">{{ errorMessage }}</p>
 
@@ -213,6 +218,12 @@ const countdown = computed(() => `${Math.floor(secondsToResend.value / 60)}:${St
 
 .confirm__status:empty {
     display: none;
+}
+
+.demo-note {
+    padding: 14px 18px;
+    border-radius: var(--radius);
+    background: var(--shallows);
 }
 
 .types {

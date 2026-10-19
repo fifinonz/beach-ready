@@ -25,7 +25,8 @@ class EmailConfirmation
      */
     public function sendFirst(User $user): void
     {
-        if ($user->hasConfirmedEmail()) {
+        // Demo accounts never get email (decision 0011).
+        if ($user->hasConfirmedEmail() || $user->is_demo) {
             return;
         }
 

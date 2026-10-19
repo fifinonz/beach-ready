@@ -25,6 +25,7 @@ class UserResource extends JsonResource
             'fasting_hours' => $this->fasting_hours,
             'why' => $this->why,
             'member_since' => $this->created_at?->toIso8601ZuluString(),
+            'is_demo' => $this->is_demo,
         ];
     }
 }
