@@ -41,7 +41,7 @@ These are product decisions. Don't change them without asking.
 - **All times are stored in UTC.** Each user has an IANA time zone (for example `Africa/Nairobi`). Convert only at the edges: when displaying, and when interpreting times the user types.
 - **Protocols:** 14:10, 16:8, 18:6 and custom. Custom fasts are capped at 20 hours. The cap is enforced on the server, not only in the UI.
 - **One active fast per user** at a time.
-- **Ending early is normal.** An ended-early fast is saved to history like any other. No language anywhere implies failure.
+- **Ending early is normal.** An ended-early fast is saved to history like any other, as long as it lasted at least 60 minutes. One ended within its first hour isn't saved at all (decision 0010). No language anywhere implies failure.
 - **The timer never counts.** Elapsed time is always calculated from the stored start time, on both server and client.
 - **Consent before email.** Email reminders stay off until the address is confirmed through a signed link that expires after 48 hours. Unconfirmed addresses get exactly one confirmation email, plus resends the user explicitly requests, limited to one per 60 seconds.
 - **Every email** includes a working unsubscribe link and a link to the preference center.
