@@ -208,9 +208,10 @@ const days = computed(() => recentDays({ fasts: history.value, timeZone: timeZon
 
                 <template v-else>
                     <div class="idle card">
+                        <p class="idle__label">Your protocol</p>
                         <p class="idle__protocol">{{ fastingHours }}:{{ 24 - fastingHours }}</p>
-                        <p>{{ fastingHours }} hours fasting, {{ 24 - fastingHours }} hours eating.
-                            <RouterLink to="/protocol?change=next">Change</RouterLink></p>
+                        <p>{{ fastingHours }} hours fasting, then {{ 24 - fastingHours }} hours eating.</p>
+                        <RouterLink to="/protocol?change=next" class="idle__change">Change protocol</RouterLink>
                     </div>
                     <p v-if="errorMessage" class="form-alert" role="alert">{{ errorMessage }}</p>
                     <button type="button" class="button button--block" :disabled="starting" @click="startFast">
@@ -346,9 +347,21 @@ const days = computed(() => recentDays({ fasts: history.value, timeZone: timeZon
     padding: 24px;
 }
 
+.idle__label {
+    color: var(--muted);
+    font-weight: 600;
+}
+
 .idle__protocol {
     font-size: 2.5rem;
     font-weight: 700;
+    line-height: 1.1;
+}
+
+.idle__change {
+    justify-self: start;
+    padding: 10px 0 0;
+    font-size: 1.0625rem;
 }
 
 .side {

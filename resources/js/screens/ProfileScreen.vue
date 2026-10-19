@@ -4,6 +4,7 @@ import { RouterLink, useRouter } from 'vue-router';
 import { api, ApiError, OfflineError } from '../api.js';
 import { logOut, session, signedIn } from '../session.js';
 import { formatHours, maskEmail } from '../time.js';
+import AppIcon from '../components/AppIcon.vue';
 import AppLayout from '../components/AppLayout.vue';
 import ModalSheet from '../components/ModalSheet.vue';
 import PageHeader from '../components/PageHeader.vue';
@@ -122,8 +123,9 @@ async function signOut() {
 
             <ul class="card rows">
                 <li>
-                    <RouterLink to="/protocol?change=next" class="row">
-                        <span>Fasting protocol</span><span class="row__value">{{ protocol }}</span>
+                    <RouterLink to="/protocol?change=next&from=/profile" class="row">
+                        <span>Fasting protocol</span>
+                        <span class="row__value row__value--link">{{ protocol }} · Change <AppIcon name="chevron" /></span>
                     </RouterLink>
                 </li>
                 <li class="row">
@@ -131,7 +133,8 @@ async function signOut() {
                 </li>
                 <li>
                     <RouterLink to="/reminders" class="row">
-                        <span>Reminders</span><span class="row__value">{{ remindersOn ?? '–' }}</span>
+                        <span>Reminders</span>
+                        <span class="row__value row__value--link">{{ remindersOn ?? '–' }} <AppIcon name="chevron" /></span>
                     </RouterLink>
                 </li>
             </ul>
@@ -291,6 +294,20 @@ async function signOut() {
 .row__value {
     color: var(--muted);
     font-weight: 400;
+}
+
+/* Rows that open another screen look like links. */
+.row__value--link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--lagoon);
+    font-weight: 600;
+}
+
+.row__value--link .icon {
+    width: 20px;
+    height: 20px;
 }
 
 .log-out {

@@ -133,6 +133,23 @@ describe('the Today screen', () => {
         expect(wrapper.get('#started-at').attributes('aria-invalid')).toBe('true');
     });
 
+    it('links to change the protocol of the fast in progress', async () => {
+        api();
+        const { wrapper } = await mountScreen(TodayScreen, '/');
+        await flushPromises();
+
+        expect(wrapper.get('a[href="/protocol?change=active"]').text()).toBe('16:8 · change');
+    });
+
+    it('links to change the protocol for the next fast when none is running', async () => {
+        stubApi({ 'GET /fasts/active': [200, { data: null }] });
+        const { wrapper } = await mountScreen(TodayScreen, '/');
+        await flushPromises();
+
+        expect(wrapper.get('a[href="/protocol?change=next"]').text()).toBe('Change protocol');
+        expect(wrapper.find('a[href="/protocol?change=active"]').exists()).toBe(false);
+    });
+
     it('offers to start a fast with the chosen protocol when none is running', async () => {
         stubApi({
             'GET /fasts/active': [200, { data: null }],
