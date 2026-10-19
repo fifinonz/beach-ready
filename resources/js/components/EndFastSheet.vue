@@ -6,7 +6,9 @@ import ModalSheet from './ModalSheet.vue';
 
 /*
  * "End your fast now?" Ending early is normal: the fast is saved to history
- * like any other, and nothing here suggests otherwise.
+ * like any other, and nothing here suggests otherwise. The exception is a
+ * fast in its first hour, which isn't saved (decision 0010): the sheet says
+ * so kindly and makes "Keep going" the main choice.
  */
 const props = defineProps({
     fast: { type: Object, required: true },
@@ -19,8 +21,12 @@ const feeling = ref(null);
 const busy = ref(false);
 const errorMessage = ref(null);
 
+// Matches Fast::MIN_COUNTED_MINUTES on the server.
+const MIN_COUNTED_SECONDS = 60 * 60;
+
 const elapsed = computed(() => elapsedSeconds(props.fast.started_at, props.now));
 const reachedGoal = computed(() => props.now >= Date.parse(props.fast.target_end_at));
+const tooShortToCount = computed(() => elapsed.value < MIN_COUNTED_SECONDS);
 
 // Pressing the chosen feeling again clears it: it's optional.
 function choose(value) {
@@ -32,6 +38,7 @@ async function endFast() {
     errorMessage.value = null;
 
     try {
+        // `data` is null when the fast was too short to be saved.
         const { data } = await api('POST', '/fasts/active/end', { feeling: feeling.value });
         emit('ended', data);
     } catch (error) {
@@ -54,12 +61,21 @@ async function endFast() {
         </template>
 
         <p class="summary">
-            <template v-if="reachedGoal">You've fasted {{ formatDuration(elapsed) }} and reached your goal. It's saved to your history.</template>
+            <template v-if="tooShortToCount">You've fasted {{ formatDuration(elapsed) }}. Fasts shorter than an hour aren't saved, so this one won't count yet. Keep going and it will.</template>
+            <template v-else-if="reachedGoal">You've fasted {{ formatDuration(elapsed) }} and reached your goal. It's saved to your history.</template>
             <template v-else>You've fasted {{ formatDuration(elapsed) }}. That still counts, and it's saved to your history either way.</template>
         </p>
 
         <p v-if="errorMessage" class="form-alert" role="alert">{{ errorMessage }}</p>
 
+        <template v-if="tooShortToCount">
+            <button class="button button--block" type="button" @click="emit('close')">Keep going</button>
+            <button class="button button--block button--outline" type="button" :disabled="busy" @click="endFast">
+                {{ busy ? 'Ending…' : 'End without saving' }}
+            </button>
+        </template>
+
+        <template v-else>
         <div class="feelings">
             <p id="feeling-question" class="feelings__question"><strong>How are you feeling?</strong> (optional)</p>
             <div class="feelings__chips" role="group" aria-labelledby="feeling-question">
@@ -80,6 +96,7 @@ async function endFast() {
             {{ busy ? 'Saving…' : 'Yes, end my fast' }}
         </button>
         <button class="button button--block button--outline" type="button" @click="emit('close')">Keep going</button>
+        </template>
     </ModalSheet>
 </template>
 

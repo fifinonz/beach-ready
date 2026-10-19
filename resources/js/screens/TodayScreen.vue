@@ -140,8 +140,19 @@ async function saveStartTime() {
 
 const ending = ref(false);
 
+const notice = ref(null);
+
 function fastEnded(ended) {
     localStorage.removeItem(ACTIVE_FAST_KEY);
+
+    // Too short to count: it wasn't saved, so there's nothing in History.
+    if (ended === null) {
+        ending.value = false;
+        fast.value = null;
+        notice.value = "Fast ended. It was under an hour, so it isn't in your history. Start again whenever you're ready.";
+        return;
+    }
+
     router.push({ path: '/history', query: { saved: ended.duration_seconds } });
 }
 
@@ -207,6 +218,7 @@ const days = computed(() => recentDays({ fasts: history.value, timeZone: timeZon
                 </template>
 
                 <template v-else>
+                    <p v-if="notice" class="notice" role="status">{{ notice }}</p>
                     <div class="idle card">
                         <p class="idle__label">Your protocol</p>
                         <p class="idle__protocol">{{ fastingHours }}:{{ 24 - fastingHours }}</p>
@@ -310,6 +322,7 @@ const days = computed(() => recentDays({ fasts: history.value, timeZone: timeZon
     justify-self: start;
     min-height: 32px;
     padding: 0;
+    text-align: left;
     border: 0;
     background: none;
     color: var(--lagoon);
@@ -339,6 +352,12 @@ const days = computed(() => recentDays({ fasts: history.value, timeZone: timeZon
 
 .reminder strong {
     font-size: 1.0625rem;
+}
+
+.notice {
+    padding: 14px 18px;
+    border-radius: var(--radius);
+    background: var(--shallows);
 }
 
 .idle {

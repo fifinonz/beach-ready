@@ -37,6 +37,12 @@ class Fast extends Model
      */
     public const MAX_BACKDATE_HOURS = 24;
 
+    /**
+     * A fast ended within its first hour isn't saved: it doesn't count as a
+     * fast. See decision 0010.
+     */
+    public const MIN_COUNTED_MINUTES = 60;
+
     public const HOURS_IN_DAY = 24;
 
     protected $attributes = [
@@ -113,6 +119,15 @@ class Fast extends Model
         $this->ended_at = $endedAt;
         $this->ended_early = $endedAt->lt($this->target_end_at);
         $this->feeling = $feeling;
+    }
+
+    /**
+     * Whether ending the fast at this time would make it count, and so be
+     * saved to history.
+     */
+    public function countsIfEndedAt(CarbonImmutable $endedAt): bool
+    {
+        return $this->started_at->diffInSeconds($endedAt) >= self::MIN_COUNTED_MINUTES * 60;
     }
 
     /**

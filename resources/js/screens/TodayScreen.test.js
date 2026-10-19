@@ -191,4 +191,24 @@ describe('the Today screen', () => {
         expect(router.currentRoute.value.fullPath).toBe('/history?saved=41040');
         expect(localStorage.getItem('beach-ready:active-fast')).toBeNull();
     });
+
+    it('stays on Today with a note when a fast was too short to save', async () => {
+        vi.setSystemTime(new Date('2026-10-18T17:42:00Z')); // 12 minutes in
+        stubApi({
+            'GET /fasts/active': [200, { data: fast }],
+            'POST /fasts/active/end': [200, { data: null, counted: false }],
+        });
+        localStorage.setItem('beach-ready:active-fast', JSON.stringify(fast));
+        const { wrapper, router } = await mountScreen(TodayScreen, '/');
+        await flushPromises();
+
+        await wrapper.findAll('button').find((b) => b.text() === 'End fast').trigger('click');
+        await wrapper.findAll('button').find((b) => b.text() === 'End without saving').trigger('click');
+        await flushPromises();
+
+        expect(router.currentRoute.value.path).toBe('/');
+        expect(wrapper.text()).toContain('Ready when you are');
+        expect(wrapper.get('.notice').text()).toContain("It was under an hour, so it isn't in your history.");
+        expect(localStorage.getItem('beach-ready:active-fast')).toBeNull();
+    });
 });
