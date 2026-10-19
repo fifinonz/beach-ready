@@ -30,6 +30,7 @@ class ConfirmEmailMail extends BeachReadyMail
     {
         return new Content(
             markdown: 'mail.confirm-email',
+            text: 'mail.text.confirm-email',
             with: [
                 'firstName' => $this->user->first_name,
                 'confirmUrl' => EmailConfirmation::url($this->user),

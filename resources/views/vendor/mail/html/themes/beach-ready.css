@@ -44,9 +44,11 @@ a img {
 
 h1 {
     color: #0C3B4A;
-    font-size: 18px;
+    font-size: 30px;
     font-weight: bold;
+    line-height: 1.2;
     margin-top: 0;
+    margin-bottom: 18px;
     text-align: start;
 }
 
@@ -65,8 +67,8 @@ h3 {
 }
 
 p {
-    font-size: 16px;
-    line-height: 1.5em;
+    font-size: 17px;
+    line-height: 1.55em;
     margin-top: 0;
     text-align: left;
 }
@@ -103,8 +105,26 @@ img {
 /* Header */
 
 .header {
-    padding: 25px 0;
+    padding: 16px 0;
     text-align: center;
+}
+
+/* The Beach Ready mark at the top of the card, as in 08-confirmation-email.png. */
+
+.brand {
+    margin-bottom: 28px;
+}
+
+.brand-icon {
+    border-radius: 50%;
+    display: block;
+}
+
+.brand-name {
+    color: #0C3B4A;
+    font-size: 24px;
+    font-weight: bold;
+    padding-left: 12px;
 }
 
 .header a {
@@ -143,10 +163,8 @@ img {
     -premailer-cellspacing: 0;
     -premailer-width: 570px;
     background-color: #ffffff;
-    border-color: #CFE3E0;
-    border-radius: 4px;
-    border-width: 1px;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    border-radius: 24px;
+    border-width: 0;
     margin: 0 auto;
     padding: 0;
     width: 570px;
@@ -182,12 +200,15 @@ img {
 
 .footer p {
     color: #2F5563;
-    font-size: 12px;
+    font-size: 15px;
+    line-height: 1.6em;
     text-align: center;
 }
 
 .footer a {
-    color: #2F5563;
+    /* A darker lagoon: the brand lagoon is only 4:1 on the shallows
+       background, below the 4.5:1 CLAUDE.md asks for. This is 5.1:1. */
+    color: #0F6E77;
     text-decoration: underline;
 }
 

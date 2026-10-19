@@ -43,6 +43,7 @@ class ReminderMail extends BeachReadyMail
 
         return new Content(
             markdown: 'mail.reminder',
+            text: 'mail.text.reminder',
             with: [
                 'firstName' => $user->first_name,
                 'body' => match ($this->reminder->type) {

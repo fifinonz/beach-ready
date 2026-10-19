@@ -60,3 +60,19 @@ it('uses the Beach Ready colours', function (BeachReadyMail $mail) {
     // The lagoon button colour from CLAUDE.md, inlined from the mail theme.
     $mail->assertSeeInHtml('#12808A', false);
 })->with('every email');
+
+it('has a plain-text version with readable links and no markdown symbols', function (BeachReadyMail $mail) {
+    $user = recipientOf($mail);
+
+    $mail->assertSeeInText('Manage email preferences: '.EmailLinks::preferences($user));
+    $mail->assertSeeInText('Unsubscribe: '.EmailLinks::unsubscribe($user));
+    $mail->assertDontSeeInText('](');
+    $mail->assertDontSeeInText('&#039;');
+    $mail->assertDontSeeInText('# ');
+})->with('every email');
+
+it('shows the Beach Ready mark and puts the footer under the card', function (BeachReadyMail $mail) {
+    $mail->assertSeeInHtml(asset('icons/icon-192.png'), false);
+    $mail->assertSeeInHtml('class="footer"', false);
+    $mail->assertDontSeeInHtml('All rights reserved');
+})->with('every email');

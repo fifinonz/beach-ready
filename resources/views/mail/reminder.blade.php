@@ -1,4 +1,4 @@
-<x-mail::message>
+<x-mail::message :reason="$footerReason" :preferences-url="$preferencesUrl" :unsubscribe-url="$unsubscribeUrl" :postal-address="$postalAddress">
 Hi {{ $firstName }},
 
 {{ $body }}
@@ -6,6 +6,4 @@ Hi {{ $firstName }},
 <x-mail::button :url="config('app.url')">
 Open Beach Ready
 </x-mail::button>
-
-@include('mail.partials.footer')
 </x-mail::message>
