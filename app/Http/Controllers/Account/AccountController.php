@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Account;
 
+use App\Account\AccountDeletion;
 use App\Account\DataExport;
 use App\Http\Controllers\Controller;
 use Carbon\CarbonImmutable;
@@ -9,7 +10,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class AccountController extends Controller
 {
@@ -45,12 +45,7 @@ class AccountController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        DB::transaction(function () use ($user) {
-            // Signs them out everywhere, not only in this browser.
-            DB::table('sessions')->where('user_id', $user->id)->delete();
-            DB::table('password_reset_tokens')->where('email', $user->email)->delete();
-            $user->delete();
-        });
+        AccountDeletion::delete($user);
 
         return response()->noContent();
     }
