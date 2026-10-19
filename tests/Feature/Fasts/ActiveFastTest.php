@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Fast;
+use App\Models\Reminder;
 use App\Models\User;
 
 beforeEach(function () {
@@ -170,6 +171,40 @@ describe('end the fast', function () {
             ->assertOk()
             ->assertJsonPath('data.feeling', $feeling);
     })->with(['great', 'okay', 'hungry', 'unwell', null]);
+
+    it('does not save a fast ended within its first hour, or its reminders', function (int $minutes) {
+        $fast = Fast::factory()->for($this->user)->create([
+            'started_at' => now()->subMinutes($minutes),
+            'target_end_at' => now()->subMinutes($minutes)->addHours(16),
+        ]);
+        Reminder::factory()->for($fast)->create(['send_at' => now()->addHours(15)]);
+
+        $this->postJson('/api/fasts/active/end', ['feeling' => 'hungry'])
+            ->assertOk()
+            ->assertExactJson(['data' => null, 'counted' => false]);
+
+        expect(Fast::count())->toBe(0)
+            ->and(Reminder::count())->toBe(0);
+        // A fresh copy of the user, as the next real request would load.
+        $this->actingAs($this->user->fresh());
+        $this->getJson('/api/fasts/active')->assertExactJson(['data' => null]);
+        $this->getJson('/api/fasts')->assertJsonCount(0, 'data');
+    })->with([0, 1, 59]);
+
+    it('saves a fast of exactly an hour, as ended early', function () {
+        Fast::factory()->for($this->user)->create([
+            'started_at' => now()->subMinutes(60),
+            'target_end_at' => now()->subMinutes(60)->addHours(16),
+        ]);
+
+        $this->postJson('/api/fasts/active/end')
+            ->assertOk()
+            ->assertJsonPath('counted', true)
+            ->assertJsonPath('data.ended_early', true)
+            ->assertJsonPath('data.duration_seconds', 3600);
+
+        expect(Fast::count())->toBe(1);
+    });
 
     it('refuses an unknown feeling', function () {
         Fast::factory()->for($this->user)->create();

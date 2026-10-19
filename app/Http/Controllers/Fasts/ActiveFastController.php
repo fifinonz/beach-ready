@@ -43,10 +43,22 @@ class ActiveFastController extends Controller
         return FastResource::make($fast);
     }
 
-    public function end(EndFastRequest $request, ReminderScheduler $reminders): FastResource
+    /**
+     * Ends the fast in progress. One ended within its first hour doesn't
+     * count: it's removed, with its reminders, and `data` is null. Anything
+     * longer is saved, marked as ended early if it stopped before the goal.
+     */
+    public function end(EndFastRequest $request, ReminderScheduler $reminders): JsonResponse
     {
         $fast = $this->activeFastOrFail($request);
         $now = CarbonImmutable::now();
+
+        if (! $fast->countsIfEndedAt($now)) {
+            // Its reminders go with it, through the foreign key's cascade.
+            $fast->delete();
+
+            return response()->json(['data' => null, 'counted' => false]);
+        }
 
         DB::transaction(function () use ($fast, $request, $reminders, $now) {
             $fast->end($now, $request->feeling());
@@ -54,7 +66,7 @@ class ActiveFastController extends Controller
             $reminders->fastEnded($fast, $now);
         });
 
-        return FastResource::make($fast);
+        return FastResource::make($fast)->additional(['counted' => true])->response();
     }
 
     private function activeFastOrFail(Request $request): Fast

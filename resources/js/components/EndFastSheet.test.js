@@ -101,3 +101,46 @@ describe('ending a fast', () => {
         expect(wrapper.emitted('ended')).toBeUndefined();
     });
 });
+
+describe('ending a fast in its first hour', () => {
+    const twelveMinutesIn = Date.parse('2026-10-18T17:42:00Z');
+
+    it('says kindly that it won\'t be saved yet, and encourages keeping going', () => {
+        const wrapper = mountSheet(twelveMinutesIn);
+
+        expect(wrapper.text()).toContain("You've fasted 12m. Fasts shorter than an hour aren't saved, so this one won't count yet. Keep going and it will.");
+        expect(wrapper.text().toLowerCase()).not.toMatch(/fail|give up|quit/);
+        expect(wrapper.find('.chip').exists()).toBe(false);
+
+        const buttons = wrapper.findAll('button.button').map((b) => b.text());
+        expect(buttons).toEqual(['Keep going', 'End without saving']);
+    });
+
+    it('keeps going without ending anything', async () => {
+        const fetch = stubApi({});
+        const wrapper = mountSheet(twelveMinutesIn);
+
+        await wrapper.findAll('button').find((b) => b.text() === 'Keep going').trigger('click');
+
+        expect(wrapper.emitted('close')).toHaveLength(1);
+        expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it('can still end it, which reports that nothing was saved', async () => {
+        stubApi({ 'POST /fasts/active/end': [200, { data: null, counted: false }] });
+        const wrapper = mountSheet(twelveMinutesIn);
+
+        await wrapper.findAll('button').find((b) => b.text() === 'End without saving').trigger('click');
+        await flushPromises();
+
+        expect(wrapper.emitted('ended')[0][0]).toBeNull();
+    });
+
+    it('counts from exactly an hour', () => {
+        const wrapper = mountSheet(Date.parse('2026-10-18T18:30:00Z'));
+
+        expect(wrapper.text()).toContain('That still counts');
+        expect(wrapper.find('.chip').exists()).toBe(true);
+    });
+});
+
