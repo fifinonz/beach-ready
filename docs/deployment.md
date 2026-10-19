@@ -1,13 +1,13 @@
 # Deployment
 
-Beach Ready runs on [Laravel Cloud](https://cloud.laravel.com). Every push to `main` deploys automatically, and GitHub Actions runs Pint and the tests on every push and pull request. Why Laravel Cloud and not a VPS: [decision 0005](decisions/0005-laravel-cloud-over-a-vps.md).
+Beach Ready runs on [Laravel Cloud](https://cloud.laravel.com) at **https://beach-ready.bwsystems.co.ke**. Every push to `main` deploys automatically, and GitHub Actions runs Pint and the tests on every push and pull request. Why Laravel Cloud and not a VPS: [decision 0005](decisions/0005-laravel-cloud-over-a-vps.md).
 
 ## What runs where
 
 | Piece | Where it runs | Notes |
 |---|---|---|
 | Web app and API | Laravel Cloud **App cluster** | One small replica is plenty to start. |
-| Scheduler | App cluster, **Scheduler** toggle | Cloud runs `schedule:run` every minute. The only task is `reminders:dispatch-due`. |
+| Scheduler | App cluster, **Scheduler** toggle | Cloud runs `schedule:run` every minute. Two tasks: `reminders:dispatch-due` every minute, and `demo:prune` every hour, which deletes demo accounts after 24 hours (decision 0011). |
 | Queue worker | App cluster, **background process** | One `queue:work` process on the `database` connection. It sends reminder emails. |
 | Database | **Laravel Serverless Postgres 17** | Holds everything, including sessions, cache, the job queue and failed jobs. |
 | Mail | MailerSend, through Laravel's built-in `smtp` mailer | No package: only `MAIL_*` variables. See [Email with MailerSend](#email-with-mailersend). |
@@ -87,13 +87,13 @@ Add these in the environment's settings. Anything not listed (database credentia
 | `APP_NAME` | `Beach Ready` | Shown in emails. |
 | `APP_ENV` | `production` | |
 | `APP_DEBUG` | `false` | Never show stack traces to users. |
-| `APP_URL` | `https://<your-app>.laravel.cloud` for now, the custom domain later | Used for links in emails, and by Sanctum to recognise the SPA as a first-party client. |
+| `APP_URL` | `https://beach-ready.bwsystems.co.ke` | Used for links in emails, and by Sanctum to recognise the SPA as a first-party client. Must match the domain people use, or logging in fails. |
 | `APP_KEY` | see below | Encrypts sessions and cookies. |
 | `SESSION_DRIVER` | `database` | Sessions survive deploys and work across replicas. |
 | `SESSION_SECURE_COOKIE` | `true` | The session cookie is only sent over HTTPS. |
 | `CACHE_STORE` | `database` | Also used by the scheduler's `withoutOverlapping` and `onOneServer` locks. |
 | `QUEUE_CONNECTION` | `database` | The reminder jobs (decision 0004). |
-| `MAIL_MAILER` | `smtp`, or `log` until MailerSend is set up | With `log`, emails go to the logs instead of being sent. |
+| `MAIL_MAILER` | `smtp` | Set up with MailerSend (below). `log` writes emails to the logs instead of sending them, which is useful on a test environment. |
 | `MAIL_HOST` | from MailerSend, e.g. `smtp.mailersend.net` | See [Email with MailerSend](#email-with-mailersend). |
 | `MAIL_PORT` | from MailerSend, e.g. `587` | Laravel switches to TLS (STARTTLS) on its own; leave `MAIL_SCHEME` unset. |
 | `MAIL_USERNAME` | the MailerSend SMTP user's username | |
@@ -113,15 +113,15 @@ Click **Deploy**. When it finishes, run these in the **Commands** tab:
 | Command | Expect |
 |---|---|
 | `php artisan migrate:status` | Every migration `Ran`. |
-| `php artisan schedule:list` | `reminders:dispatch-due` every minute. |
+| `php artisan schedule:list` | `reminders:dispatch-due` every minute and `demo:prune` every hour. |
 | `php artisan tinker --execute="echo DB::selectOne('show timezone')->TimeZone;"` | `UTC` |
 | `php artisan queue:failed` | No failed jobs. |
 
-Then open `https://<your-app>.laravel.cloud/up`, which should return 200.
+Then open `https://beach-ready.bwsystems.co.ke/up`, which should return 200.
 
 ### Email with MailerSend
 
-Beach Ready sends mail through MailerSend's SMTP relay with Laravel's own `smtp` mailer, so there's no MailerSend package to install. Until this is done, keep `MAIL_MAILER=log`.
+Beach Ready sends mail through MailerSend's SMTP relay with Laravel's own `smtp` mailer, so there's no MailerSend package to install. Production sends from the verified domain `bwsystems.co.ke`.
 
 1. **Add and verify your sending domain** in MailerSend. It gives you DNS records for SPF, DKIM and the return path; add them at your DNS provider and wait for MailerSend to show the domain as verified.
 2. **Create an SMTP user** in the domain's SMTP section. Copy the host, port, username and password straight away; the password may only be shown once.
@@ -130,9 +130,16 @@ Beach Ready sends mail through MailerSend's SMTP relay with Laravel's own `smtp`
 
 Every email is queued and sent by the queue worker, so if nothing arrives, check `php artisan queue:failed` in the Commands tab first.
 
-### Later: custom domain
+### Custom domain
 
-Add the domain in the environment's **Domains** settings ([docs](https://cloud.laravel.com/docs/domains)). Then set `APP_URL` to it and redeploy, so email links and Sanctum use the new address.
+The app is served at `beach-ready.bwsystems.co.ke`, added in the environment's **Domains** settings ([docs](https://cloud.laravel.com/docs/domains)), with `APP_URL` set to it. To move to another domain, add it there, change `APP_URL`, and redeploy.
+
+- **The `laravel.cloud` address still works.** It keeps serving the app, so links in emails sent before the switch still work there. It could later redirect to the custom domain.
+- **Each domain is its own origin.** Sessions, the cached app shell and installed PWAs belong to one domain, so after a domain change people sign in again and reinstall the app.
+
+### Demo accounts
+
+"Try the demo" needs no settings. Demo accounts use the reserved `demo.invalid` domain, so nothing is ever emailed to them, and the scheduler's hourly `demo:prune` deletes them after 24 hours (decision 0011). To delete every demo account straight away, run `php artisan demo:prune --all` in the Commands tab.
 
 ## Running costs to keep in mind
 
