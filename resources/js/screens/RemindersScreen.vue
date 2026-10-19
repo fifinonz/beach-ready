@@ -102,7 +102,7 @@ const emailStatus = computed(() => {
     return email.value.email_confirmed ? 'On' : 'Waiting for confirmation';
 });
 
-const timeZone = computed(() => session.user.timezone);
+const timeZone = computed(() => session.user?.timezone);
 const zoneName = computed(() =>
     new Intl.DateTimeFormat('en-KE', { timeZone: timeZone.value, timeZoneName: 'short' })
         .formatToParts(new Date())
@@ -115,7 +115,8 @@ const countdown = computed(() => `${Math.floor(secondsToResend.value / 60)}:${St
     <AppLayout>
         <PageHeader title="Reminders" />
 
-        <div class="reminders">
+        <!-- Nothing to show once there's no user, such as just after signing out. -->
+        <div v-if="session.user" class="reminders">
             <section v-if="waiting" class="confirm" aria-labelledby="confirm-title">
                 <h2 id="confirm-title"><AppIcon name="mail" /> Confirm your email to turn on email reminders</h2>
                 <p>We sent a link to {{ maskEmail(session.user.email) }}. Nothing is emailed until you click it.</p>
