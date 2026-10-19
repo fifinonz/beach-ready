@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use App\Demo\DemoAccount;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Mail\Events\MessageSending;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -24,6 +27,23 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureRateLimits();
+        $this->neverEmailDemoAccounts();
+    }
+
+    /**
+     * The last line of defence for demo accounts (decision 0011): any email
+     * addressed to the reserved demo domain is stopped at the moment of
+     * sending, whatever queued it. Returning false cancels the send.
+     */
+    private function neverEmailDemoAccounts(): void
+    {
+        Event::listen(function (MessageSending $event) {
+            foreach ($event->message->getTo() as $address) {
+                if (DemoAccount::isDemoEmail($address->getAddress())) {
+                    return false;
+                }
+            }
+        });
     }
 
     /**
@@ -33,6 +53,10 @@ class AppServiceProvider extends ServiceProvider
      */
     private function configureRateLimits(): void
     {
+        // Demo accounts from one IP address: ten an hour is plenty for a
+        // curious visitor and keeps a script from filling the database.
+        RateLimiter::for('demo', fn (Request $request) => Limit::perHour(10)->by($request->ip()));
+
         // Sign-ups from one IP address. Ten an hour leaves room for a
         // household or an office sharing one connection.
         RateLimiter::for('register', fn (Request $request) => Limit::perHour(10)->by($request->ip()));
