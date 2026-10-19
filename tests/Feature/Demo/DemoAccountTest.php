@@ -4,6 +4,7 @@ use App\Mail\ConfirmEmailMail;
 use App\Mail\ResetPasswordMail;
 use App\Models\Fast;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -71,6 +72,20 @@ describe('trying the demo', function () {
 
         // 15 days back, minus the rest days 4 and 9 days ago.
         $this->getJson('/api/stats/week')->assertJsonPath('data.current_streak_days', 13);
+    });
+
+    it('includes a fast finished today once it would have ended, so this week is never empty', function () {
+        // Monday, 18:00 in Nairobi: today's fast ended around midday.
+        $this->travelTo('2026-10-26 15:00:00');
+
+        tryTheDemo();
+
+        $this->getJson('/api/stats/week')
+            ->assertJsonPath('data.fasts_this_week', 1)
+            ->assertJsonPath('data.current_streak_days', 14);
+        $active = $this->getJson('/api/fasts/active')->json('data');
+        $endedToday = User::sole()->fasts()->whereNotNull('ended_at')->latest('ended_at')->first();
+        expect(CarbonImmutable::parse($active['started_at'])->gte($endedToday->ended_at))->toBeTrue();
     });
 
     it('shows the fast in progress about ten hours in', function () {

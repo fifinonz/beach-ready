@@ -70,21 +70,26 @@ class DemoAccount
 
     /**
      * One finished 16:8 fast for each day, starting around 8 pm the evening
-     * before and ending the next day, apart from the rest days. Returns when
-     * the last one ended.
+     * before and ending the next day, apart from the rest days. Today has
+     * one too if it would already have ended an hour ago, so "this week" has
+     * something to show even on a Monday. Returns when the last one ended.
      */
     private static function history(User $user, CarbonImmutable $now): CarbonImmutable
     {
         $today = $now->setTimezone($user->timezone)->startOfDay();
         $lastEnded = $now->subDays(self::DAYS_OF_HISTORY + 1);
 
-        foreach (range(self::DAYS_OF_HISTORY, 1) as $i => $daysAgo) {
+        foreach (range(self::DAYS_OF_HISTORY, 0) as $i => $daysAgo) {
             if (in_array($daysAgo, self::REST_DAYS, true)) {
                 continue;
             }
 
             $startedAt = $today->subDays($daysAgo + 1)->setTime(20, ($i * 7) % 40)->utc();
             $endedAt = $startedAt->addMinutes(self::LENGTHS[$i % count(self::LENGTHS)]);
+
+            if ($endedAt->gt($now->subHour())) {
+                break;
+            }
             $feeling = self::FEELINGS[$i % count(self::FEELINGS)];
 
             $fast = new Fast;
@@ -100,8 +105,8 @@ class DemoAccount
     }
 
     /**
-     * A fast about ten hours in, so Today shows the timer straight away. It
-     * never starts before the last one ended.
+     * A fast in progress, so Today shows the timer straight away: about ten
+     * hours in, or an hour after today's fast ended if that was more recent.
      */
     private static function fastInProgress(User $user, CarbonImmutable $now, CarbonImmutable $lastEnded): void
     {
