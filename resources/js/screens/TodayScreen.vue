@@ -310,6 +310,7 @@ const days = computed(() => recentDays({ fasts: history.value, timeZone: timeZon
     justify-self: start;
     min-height: 32px;
     padding: 0;
+    text-align: left;
     border: 0;
     background: none;
     color: var(--lagoon);
