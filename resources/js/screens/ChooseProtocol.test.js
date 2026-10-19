@@ -38,38 +38,86 @@ describe('choosing a protocol', () => {
         expect(wrapper.get('output').text()).toBe('12:12');
     });
 
-    it('saves the choice and starts the first fast when signing up', async () => {
-        const fetch = stubApi({
-            'PATCH /user': [200, { data: { ...user, fasting_hours: 18 } }],
-            'POST /fasts': [201, { data: {} }],
-        });
+    it('saves the choice when signing up and goes to Today, without starting a fast', async () => {
+        const fetch = stubApi({ 'PATCH /user': [200, { data: { ...user, fasting_hours: 18 } }] });
         const { wrapper, router } = await mountScreen(ChooseProtocol, '/protocol');
 
+        expect(wrapper.get('button[type="submit"]').text()).toBe('Continue');
         await wrapper.get('input[value="18"]').setValue(true);
         await wrapper.get('form').trigger('submit');
         await flushPromises();
 
         expect(sentTo(fetch, 'PATCH', '/user')).toEqual([{ fasting_hours: 18 }]);
-        expect(sentTo(fetch, 'POST', '/fasts')).toEqual([{ fasting_hours: 18 }]);
+        expect(sentTo(fetch, 'POST', '/fasts')).toEqual([]);
         expect(session.user.fasting_hours).toBe(18);
         expect(router.currentRoute.value.path).toBe('/');
     });
 
-    it('changes the fast in progress when opened from its "change" link', async () => {
+    it('can be skipped, keeping 16:8, without saving or starting anything', async () => {
+        const fetch = stubApi({});
+        const { wrapper, router } = await mountScreen(ChooseProtocol, '/protocol');
+
+        await wrapper.get('a.skip').trigger('click');
+        await flushPromises();
+
+        expect(fetch).not.toHaveBeenCalled();
+        expect(router.currentRoute.value.path).toBe('/');
+    });
+
+    it('saves the protocol for the next fast and goes back to Profile', async () => {
+        const fetch = stubApi({ 'PATCH /user': [200, { data: { ...user, fasting_hours: 14 } }] });
+        session.user.fasting_hours = 16;
+        const { wrapper, router } = await mountScreen(ChooseProtocol, '/protocol?change=next&from=/profile');
+
+        expect(wrapper.text()).not.toContain('Step 2 of 2');
+        expect(wrapper.find('a.skip').exists()).toBe(false);
+        expect(wrapper.get('button[type="submit"]').text()).toBe('Save');
+        await wrapper.get('input[value="14"]').setValue(true);
+        await wrapper.get('form').trigger('submit');
+        await flushPromises();
+
+        expect(sentTo(fetch, 'PATCH', '/user')).toEqual([{ fasting_hours: 14 }]);
+        expect(sentTo(fetch, 'PATCH', '/fasts/active')).toEqual([]);
+        expect(router.currentRoute.value.path).toBe('/profile');
+    });
+
+    it('starts from a custom preference when there is one', async () => {
+        session.user.fasting_hours = 13;
+        const { wrapper } = await mountScreen(ChooseProtocol, '/protocol?change=next');
+
+        expect(wrapper.get('input[value="custom"]').element.checked).toBe(true);
+        expect(wrapper.get('output').text()).toBe('13:11');
+    });
+
+    it('changes the fast in progress, starting from that fast\'s protocol', async () => {
         const fetch = stubApi({
+            'GET /fasts/active': [200, { data: { id: 7, fasting_hours: 18 } }],
             'PATCH /user': [200, { data: { ...user, fasting_hours: 14 } }],
             'PATCH /fasts/active': [200, { data: {} }],
         });
         session.user.fasting_hours = 16;
-        const { wrapper } = await mountScreen(ChooseProtocol, '/protocol?change=active');
+        const { wrapper, router } = await mountScreen(ChooseProtocol, '/protocol?change=active');
+        await flushPromises();
 
-        expect(wrapper.text()).not.toContain('Step 2 of 2');
+        expect(wrapper.get('input[value="18"]').element.checked).toBe(true);
+        expect(wrapper.get('button[type="submit"]').text()).toBe('Save and update this fast');
         await wrapper.get('input[value="14"]').setValue(true);
         await wrapper.get('form').trigger('submit');
         await flushPromises();
 
         expect(sentTo(fetch, 'PATCH', '/fasts/active')).toEqual([{ fasting_hours: 14 }]);
-        expect(sentTo(fetch, 'POST', '/fasts')).toEqual([]);
+        expect(sentTo(fetch, 'PATCH', '/user')).toEqual([{ fasting_hours: 14 }]);
+        expect(router.currentRoute.value.path).toBe('/');
+    });
+
+    it('never goes back to another site', async () => {
+        stubApi({ 'PATCH /user': [200, { data: user }] });
+        const { wrapper, router } = await mountScreen(ChooseProtocol, '/protocol?change=next&from=//evil.example');
+
+        await wrapper.get('form').trigger('submit');
+        await flushPromises();
+
+        expect(router.currentRoute.value.path).toBe('/');
     });
 
     it('says so when offline', async () => {

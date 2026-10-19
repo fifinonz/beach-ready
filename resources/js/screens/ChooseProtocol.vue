@@ -1,14 +1,20 @@
 <script setup>
-import { computed, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { api, ApiError, OfflineError } from '../api.js';
+import { computed, onMounted, ref } from 'vue';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
+import { api, OfflineError } from '../api.js';
 import { session, signedIn } from '../session.js';
 import AppIcon from '../components/AppIcon.vue';
 
 /*
- * Step 2 of signing up, and also where "change" leads from Today and
- * Profile. When signing up, the button starts the first fast. Otherwise it
- * saves the choice, and moves the goal of a fast in progress.
+ * Step 2 of signing up, and where "change" leads from Today and Profile.
+ * It saves the protocol new fasts use; it never starts a fast by itself.
+ *
+ * - Signing up (no `change`): "Continue" saves the choice, "Skip for now"
+ *   keeps 16:8. Both go to Today, ready for a first fast.
+ * - `change=next`: saves the protocol for the next fast.
+ * - `change=active`: also moves the goal of the fast in progress.
+ *
+ * `from` is where to go back to afterwards, such as /profile.
  */
 const route = useRoute();
 const router = useRouter();
@@ -22,13 +28,36 @@ const presets = [
     { hours: 18, name: '18:6', badge: null },
 ];
 
-const current = session.user?.fasting_hours ?? 16;
-const isPreset = presets.some((preset) => preset.hours === current);
-const choice = ref(isPreset ? String(current) : 'custom');
-const customHours = ref(isPreset ? 15 : current);
+const choice = ref('16');
+const customHours = ref(15);
+
+/** Shows the given hours as chosen: a preset card, or custom. */
+function select(current) {
+    const isPreset = presets.some((preset) => preset.hours === current);
+    choice.value = isPreset ? String(current) : 'custom';
+    customHours.value = isPreset ? 15 : current;
+}
+
+select(session.user?.fasting_hours ?? 16);
 
 const onboarding = computed(() => route.query.change === undefined);
+const changingActive = computed(() => route.query.change === 'active');
 const hours = computed(() => (choice.value === 'custom' ? customHours.value : Number(choice.value)));
+
+// Only paths inside the app, never another site.
+const returnTo = computed(() => (typeof route.query.from === 'string' && /^\/(?!\/)/.test(route.query.from) ? route.query.from : '/'));
+
+// Changing the fast in progress starts from that fast's protocol, which
+// may differ from the saved preference.
+onMounted(async () => {
+    if (changingActive.value) {
+        const active = await api('GET', '/fasts/active').catch(() => null);
+
+        if (active?.data) {
+            select(active.data.fasting_hours);
+        }
+    }
+});
 
 const busy = ref(false);
 const errorMessage = ref(null);
@@ -44,16 +73,11 @@ async function save() {
     try {
         signedIn((await api('PATCH', '/user', { fasting_hours: hours.value })).data);
 
-        if (onboarding.value) {
-            await api('POST', '/fasts', { fasting_hours: hours.value }).catch((error) => {
-                // A fast already running (from another device) is fine.
-                if (!(error instanceof ApiError && error.status === 409)) throw error;
-            });
-        } else if (route.query.change === 'active') {
+        if (changingActive.value) {
             await api('PATCH', '/fasts/active', { fasting_hours: hours.value });
         }
 
-        await router.push('/');
+        await router.push(returnTo.value);
     } catch (error) {
         errorMessage.value = error instanceof OfflineError
             ? "You're offline. Connect to the internet to save your choice."
@@ -115,8 +139,9 @@ async function save() {
             </p>
 
             <button class="button button--block" type="submit" :disabled="busy">
-                {{ onboarding ? 'Start my first fast' : 'Save' }}
+                {{ onboarding ? 'Continue' : changingActive ? 'Save and update this fast' : 'Save' }}
             </button>
+            <RouterLink v-if="onboarding" to="/" class="skip">Skip for now</RouterLink>
         </form>
     </main>
 </template>
@@ -291,5 +316,11 @@ fieldset {
 
 form .button {
     margin-top: 12px;
+}
+
+.skip {
+    align-self: center;
+    padding: 10px 16px;
+    font-size: 1.0625rem;
 }
 </style>

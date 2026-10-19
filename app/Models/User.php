@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\ReminderType;
+use App\Mail\ResetPasswordMail;
 use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Mail;
 
 #[Fillable(['first_name', 'email', 'password', 'timezone'])]
 #[Hidden(['password', 'remember_token'])]
@@ -63,6 +65,16 @@ class User extends Authenticatable
     public function activeFast(): HasOne
     {
         return $this->hasOne(Fast::class)->whereNull('ended_at');
+    }
+
+    /**
+     * Sends our own reset email instead of Laravel's default notification,
+     * queued so the response takes as long whether or not the account
+     * exists.
+     */
+    public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
+    {
+        Mail::to($this)->queue(new ResetPasswordMail($this, $token));
     }
 
     /**

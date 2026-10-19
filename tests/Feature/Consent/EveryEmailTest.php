@@ -1,6 +1,7 @@
 <?php
 
 use App\Consent\EmailLinks;
+use App\Mail\AccountMail;
 use App\Mail\BeachReadyMail;
 use App\Mail\ConfirmEmailMail;
 use App\Mail\ReminderMail;
@@ -12,17 +13,19 @@ use Illuminate\Mail\Mailable;
 /*
 | CLAUDE.md: every email includes a working unsubscribe link and a link to
 | the preference center. Each kind of email Beach Ready sends is listed
-| here, so a new one can't skip the footer or the headers.
+| here, so a new one can't skip the footer or the headers. The one exception
+| is an account email, such as a password reset, which extends AccountMail
+| instead (decision 0009).
 */
 
-it('is the base of every email the app can send', function () {
+it('is the base of every email the app can send, apart from account emails', function () {
     $mailables = collect(glob(app_path('Mail/*.php')))
         ->map(fn (string $path) => 'App\\Mail\\'.basename($path, '.php'))
         ->filter(fn (string $class) => is_subclass_of($class, Mailable::class) && ! (new ReflectionClass($class))->isAbstract());
 
     expect($mailables)->not->toBeEmpty();
-    $mailables->each(fn (string $class) => expect(is_subclass_of($class, BeachReadyMail::class))
-        ->toBeTrue("{$class} must extend BeachReadyMail to get the footer and unsubscribe headers."));
+    $mailables->each(fn (string $class) => expect(is_subclass_of($class, BeachReadyMail::class) || is_subclass_of($class, AccountMail::class))
+        ->toBeTrue("{$class} must extend BeachReadyMail to get the footer and unsubscribe headers, or AccountMail if it's about the account itself."));
 });
 
 dataset('every email', [
@@ -59,4 +62,20 @@ it('shows the postal address when one is set', function (BeachReadyMail $mail) {
 it('uses the Beach Ready colours', function (BeachReadyMail $mail) {
     // The lagoon button colour from CLAUDE.md, inlined from the mail theme.
     $mail->assertSeeInHtml('#12808A', false);
+})->with('every email');
+
+it('has a plain-text version with readable links and no markdown symbols', function (BeachReadyMail $mail) {
+    $user = recipientOf($mail);
+
+    $mail->assertSeeInText('Manage email preferences: '.EmailLinks::preferences($user));
+    $mail->assertSeeInText('Unsubscribe: '.EmailLinks::unsubscribe($user));
+    $mail->assertDontSeeInText('](');
+    $mail->assertDontSeeInText('&#039;');
+    $mail->assertDontSeeInText('# ');
+})->with('every email');
+
+it('shows the Beach Ready mark and puts the footer under the card', function (BeachReadyMail $mail) {
+    $mail->assertSeeInHtml(asset('icons/icon-192.png'), false);
+    $mail->assertSeeInHtml('class="footer"', false);
+    $mail->assertDontSeeInHtml('All rights reserved');
 })->with('every email');

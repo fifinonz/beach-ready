@@ -3,7 +3,7 @@ import { reactive, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { api, ApiError, OfflineError } from '../api.js';
 import { signedIn } from '../session.js';
-import BrandMark from '../components/BrandMark.vue';
+import AuthLayout from '../components/AuthLayout.vue';
 
 // There's no design for this screen; it follows the sign-up screen's style.
 const router = useRouter();
@@ -37,11 +37,7 @@ async function logIn() {
 </script>
 
 <template>
-    <main class="log-in">
-        <BrandMark />
-
-        <h1>Welcome back</h1>
-
+    <AuthLayout title="Welcome back">
         <form novalidate @submit.prevent="logIn">
             <p v-if="errorMessage" class="form-alert" role="alert">{{ errorMessage }}</p>
 
@@ -53,6 +49,7 @@ async function logIn() {
             <div class="field">
                 <label for="password">Password</label>
                 <input id="password" v-model="form.password" type="password" autocomplete="current-password" required />
+                <RouterLink to="/forgot-password" class="forgot">Forgot password?</RouterLink>
             </div>
 
             <button class="button button--block" type="submit" :disabled="busy">
@@ -60,35 +57,13 @@ async function logIn() {
             </button>
         </form>
 
-        <p class="sign-up">New to Beach Ready? <RouterLink to="/signup">Create an account</RouterLink></p>
-    </main>
+        <p class="after">New to Beach Ready? <RouterLink to="/signup">Create an account</RouterLink></p>
+    </AuthLayout>
 </template>
 
 <style scoped>
-.log-in {
-    display: grid;
-    gap: 32px;
-    max-width: 30rem;
-    margin: 0 auto;
-    padding: 28px var(--gutter) 32px;
-}
-
-h1 {
-    font-size: 2.25rem;
-    letter-spacing: -0.02em;
-}
-
-form {
-    display: grid;
-    gap: 22px;
-}
-
-form .button {
-    margin-top: 12px;
-}
-
-.sign-up {
-    text-align: center;
-    font-size: 1.0625rem;
+.forgot {
+    justify-self: end;
+    padding: 8px 0;
 }
 </style>

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Fasts\ActiveFastController;
 use App\Http\Controllers\Fasts\AllTimeStatsController;
@@ -16,6 +17,10 @@ Route::post('/register', [RegisteredUserController::class, 'store'])
     ->middleware(['throttle:register', 'honeypot']);
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('throttle:login');
+Route::post('/forgot-password', [PasswordResetController::class, 'sendLink'])
+    ->middleware('throttle:forgot-password');
+Route::post('/reset-password', [PasswordResetController::class, 'reset'])
+    ->middleware('throttle:reset-password');
 
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);

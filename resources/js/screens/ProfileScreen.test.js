@@ -56,7 +56,7 @@ describe('the Profile screen', () => {
         await flushPromises();
 
         expect(wrapper.findAll('.row').map((row) => row.text())).toEqual([
-            'Fasting protocol16:8',
+            'Fasting protocol16:8 · Change',
             'Time zoneAfrica/Nairobi',
             'Reminders2 on',
         ]);
@@ -68,6 +68,14 @@ describe('the Profile screen', () => {
         await flushPromises();
 
         expect(wrapper.findAll('.row')[2].text()).toBe('RemindersOff');
+    });
+
+    it('links to change the protocol, and comes back to Profile afterwards', async () => {
+        stubProfile();
+        const { wrapper } = await mountScreen(ProfileScreen, '/profile');
+        await flushPromises();
+
+        expect(wrapper.findAll('.row')[0].attributes('href')).toBe('/protocol?change=next&from=/profile');
     });
 
     it('saves "my why" when you leave the field, and can clear it', async () => {

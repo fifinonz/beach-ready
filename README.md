@@ -8,20 +8,20 @@ Beach Ready is a Laravel and Vue 3 web app that runs as an installable PWA. Star
 
 ## Features
 
-- [ ] Accounts with email and password
-- [ ] Fasting protocols: 14:10, 16:8, 18:6 and custom (capped at 20 hours)
+- [x] Accounts with email and password
+- [x] Fasting protocols: 14:10, 16:8, 18:6 and custom (capped at 20 hours)
 - [ ] Live timer that stays correct when the phone sleeps (calculated from the start time, not by counting ticks)
-- [ ] End a fast early, with no guilt: every fast is saved to history
-- [ ] History, weekly chart and streaks
+- [x] End a fast early, with no guilt: every fast is saved to history
+- [x] History, weekly chart and streaks
 - [ ] Reminders sent as queued jobs: "30 minutes to go", "goal reached", "eating window closing"
 - [ ] Reminders that reschedule or cancel when a fast is edited or ended
-- [ ] Double opt-in for email: nothing is sent until the address is confirmed
+- [x] Double opt-in for email: nothing is sent until the address is confirmed
 - [ ] Preference center: per-topic email settings and one-click unsubscribe
   (the weekly summary and product news topics are stored, but nothing sends them yet)
-- [ ] Download my data and delete my account
+- [x] Download my data and delete my account
 - [x] Rate limiting on public endpoints
-- [ ] Honeypot on sign-up
-- [ ] Installable on a phone as a PWA
+- [x] Honeypot on sign-up
+- [x] Installable on a phone as a PWA
 
 ## Tech stack
 
