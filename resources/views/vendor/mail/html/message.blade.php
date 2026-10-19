@@ -3,9 +3,10 @@
     Beach Ready mark at the top of the card, and under the card why the
     person is getting the email, the preference center and unsubscribe
     links, and the postal address. Every email passes these in; see
-    App\Mail\BeachReadyMail::footer().
+    BeachReadyMail::footer(). Account emails (AccountMail) have no
+    preference center or unsubscribe links.
 --}}
-@props(['reason', 'preferencesUrl', 'unsubscribeUrl', 'postalAddress' => null])
+@props(['reason', 'preferencesUrl' => null, 'unsubscribeUrl' => null, 'postalAddress' => null])
 <x-mail::layout>
 <x-slot:header>
 <tr>
@@ -24,8 +25,10 @@
 
 <x-slot:footer>
 <x-mail::footer>
-{{ $reason }}<br>
-[Manage email preferences]({{ $preferencesUrl }}) · [Unsubscribe]({{ $unsubscribeUrl }})
+{{ $reason }}
+@if ($preferencesUrl)
+<br>[Manage email preferences]({{ $preferencesUrl }}) · [Unsubscribe]({{ $unsubscribeUrl }})
+@endif
 @if ($postalAddress)
 <br>Beach Ready · {{ $postalAddress }}
 @endif

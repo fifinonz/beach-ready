@@ -45,6 +45,19 @@ class AppServiceProvider extends ServiceProvider
             Limit::perMinute(20)->by($request->ip()),
         ]);
 
+        // Password reset requests: five an hour from one IP address, and
+        // five an hour for one email address from anywhere, so nobody can
+        // flood an inbox with reset emails.
+        RateLimiter::for('forgot-password', fn (Request $request) => [
+            Limit::perHour(5)->by('ip:'.$request->ip()),
+            Limit::perHour(5)->by('email:'.Str::lower((string) $request->input('email'))),
+        ]);
+
+        // Setting a new password with a reset token: ten an hour from one IP
+        // address. Tokens can't be guessed, but there's no reason to let a
+        // script try.
+        RateLimiter::for('reset-password', fn (Request $request) => Limit::perHour(10)->by($request->ip()));
+
         // Confirmation resends: five an hour for one account. The domain
         // rule of one per 60 seconds still applies underneath.
         RateLimiter::for('confirmation-resend', fn (Request $request) => Limit::perHour(5)->by((string) $request->user()?->id));
