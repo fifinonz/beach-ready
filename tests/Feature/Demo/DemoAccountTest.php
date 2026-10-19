@@ -179,6 +179,17 @@ describe('cleaning up', function () {
             ->and(User::find($real->id))->not->toBeNull();
     });
 
+    it('can delete every demo account straight away, but never real ones', function () {
+        tryTheDemo();
+        auth()->logout();
+        $real = User::factory()->create();
+
+        $this->artisan('demo:prune --all')->expectsOutput('Deleted 1 demo accounts.')->assertSuccessful();
+
+        expect(User::where('is_demo', true)->exists())->toBeFalse()
+            ->and(User::find($real->id))->not->toBeNull();
+    });
+
     it('runs every hour, on one server', function () {
         $event = collect(app(Schedule::class)->events())
             ->first(fn ($event) => str_contains($event->command, 'demo:prune'));

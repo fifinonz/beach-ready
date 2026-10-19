@@ -10,7 +10,7 @@ use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
-#[Signature('demo:prune')]
+#[Signature('demo:prune {--all : Delete every demo account, whatever its age}')]
 #[Description('Delete demo accounts more than 24 hours old')]
 class PruneDemoAccounts extends Command
 {
@@ -21,7 +21,7 @@ class PruneDemoAccounts extends Command
 
         User::query()
             ->where('is_demo', true)
-            ->where('created_at', '<', $cutoff)
+            ->unless($this->option('all'), fn ($query) => $query->where('created_at', '<', $cutoff))
             ->eachById(function (User $user) use (&$count) {
                 AccountDeletion::delete($user);
                 $count++;
